@@ -1,0 +1,120 @@
+---
+import '../styles/global.css'
+import Layout from './Layout.astro';
+
+interface Props {
+  title?: string;
+}
+
+const { title = 'Admin Dashboard' } = Astro.props;
+const currentPath = Astro.url.pathname;
+---
+
+<Layout title={title}>
+  <div class="flex min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gray-800/50 backdrop-blur-sm border-r border-green-500/20 fixed h-full overflow-y-auto">
+      <div class="p-6 border-b border-green-500/20">
+        <h1 class="text-2xl font-bold text-yellow-400">Admin Panel</h1>
+        <p class="text-sm text-gray-400 mt-1">Symbiocroft</p>
+      </div>
+
+      <nav class="p-4">
+        <ul class="space-y-2">
+          <li>
+            <a 
+              href="/admin" 
+              class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${currentPath === '/admin' || currentPath === '/admin/' ? 'bg-green-500/20 text-green-400 border border-green-500/40' : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'}`}
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+              </svg>
+              <span class="font-medium">Dashboard</span>
+            </a>
+          </li>
+
+          <li>
+            <a 
+              href="/admin/products" 
+              class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${currentPath.startsWith('/admin/products') ? 'bg-green-500/20 text-green-400 border border-green-500/40' : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'}`}
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+              </svg>
+              <span class="font-medium">Products</span>
+            </a>
+          </li>
+
+          <li>
+            <a 
+              href="/admin/articles" 
+              class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${currentPath.startsWith('/admin/articles') ? 'bg-green-500/20 text-green-400 border border-green-500/40' : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'}`}
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <span class="font-medium">Articles</span>
+            </a>
+          </li>
+
+          <li>
+            <a 
+              href="/admin/orders" 
+              class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${currentPath.startsWith('/admin/orders') ? 'bg-green-500/20 text-green-400 border border-green-500/40' : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'}`}
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+              </svg>
+              <span class="font-medium">Orders</span>
+            </a>
+          </li>
+
+          <li class="pt-4 mt-4 border-t border-gray-700">
+            <a 
+              href="/" 
+              class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-all"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+              </svg>
+              <span class="font-medium">View Website</span>
+            </a>
+          </li>
+
+          <li>
+            <a 
+              href="/admin/login" 
+              class="flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-lg transition-all"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+              </svg>
+              <span class="font-medium">Logout</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-64 flex-1 p-8">
+      <slot />
+    </main>
+  </div>
+</Layout>
+
+<style>
+  aside::-webkit-scrollbar {
+    width: 6px;
+  }
+  aside::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+  }
+  aside::-webkit-scrollbar-thumb {
+    background: rgba(16, 185, 129, 0.3);
+    border-radius: 3px;
+  }
+  aside::-webkit-scrollbar-thumb:hover {
+    background: rgba(16, 185, 129, 0.5);
+  }
+</style>

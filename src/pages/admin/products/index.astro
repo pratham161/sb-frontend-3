@@ -1,0 +1,378 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Products - Symbiocroft Admin">
+  <div id="loadingState" class="flex items-center justify-center min-h-screen">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-500 mx-auto mb-4"></div>
+      <p class="text-gray-400">Loading products...</p>
+    </div>
+  </div>
+
+  <div id="contentContainer" class="hidden">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-white mb-2">Products Management</h1>
+        <p class="text-gray-400">Manage all your products here</p>
+      </div>
+      <a
+        href="/admin/products/new"
+        class="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-lg transition-all duration-200 transform active:scale-95 shadow-lg hover:shadow-green-500/20 flex items-center gap-2"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Add New Product
+      </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-gray-800/50 backdrop-blur-sm border border-green-500/30 rounded-xl p-6 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-400 mb-2">Search</label>
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Search products..."
+            class="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-400 mb-2">Category</label>
+          <select id="categoryFilter" class="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none">
+            <option value="">All Categories</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-400 mb-2">Status</label>
+          <select id="statusFilter" class="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none">
+            <option value="">All Status</option>
+            <option value="published">Published</option>
+            <option value="draft">Draft</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-400 mb-2">Sort By</label>
+          <select id="sortFilter" class="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="price_low">Price: Low to High</option>
+            <option value="price_high">Price: High to Low</option>
+            <option value="name">Name: A to Z</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Products will be inserted here dynamically -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden text-center py-16">
+      <svg class="w-24 h-24 mx-auto text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+      </svg>
+      <h3 class="text-xl font-bold text-white mb-2">No products found</h3>
+      <p class="text-gray-400 mb-6">Try adjusting your filters or add a new product</p>
+      <a href="/admin/products/new" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-lg transition-all">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Add New Product
+      </a>
+    </div>
+
+    <!-- Pagination -->
+    <div id="paginationContainer" class="mt-8 flex items-center justify-between">
+      <p id="paginationInfo" class="text-sm text-gray-400"></p>
+      <div id="paginationButtons" class="flex gap-2"></div>
+    </div>
+  </div>
+</AdminLayout>
+
+  <script>
+    import { productService } from '../../../services/productService';
+    import { categoryService } from '../../../services/categoryService';
+    import { UPLOADS_URL } from '../../../utils/api';
+
+    let allProducts: any[] = [];
+    let allCategories: any[] = [];
+    let currentPage = 1;
+    const productsPerPage = 9;
+
+    // Fetch products and categories
+    async function loadData() {
+      try {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          window.location.href = '/admin/login';
+          return;
+        }
+
+        // Fetch products and categories in parallel
+        const [productsRes, categoriesRes] = await Promise.all([
+          productService.getAllProducts(),
+          categoryService.getAllCategories()
+        ]);
+
+        if (productsRes.success && categoriesRes.success) {
+          allProducts = productsRes.data || [];
+          allCategories = categoriesRes.data || [];
+
+          populateCategories();
+          renderProducts();
+        } else {
+          throw new Error('Failed to fetch data');
+        }
+
+        // Show content, hide loading
+        document.getElementById('loadingState')?.classList.add('hidden');
+        document.getElementById('contentContainer')?.classList.remove('hidden');
+      } catch (error) {
+        console.error('Error loading data:', error);
+        alert('Failed to load products. Please try again.');
+        document.getElementById('loadingState')?.classList.add('hidden');
+        document.getElementById('contentContainer')?.classList.remove('hidden');
+        document.getElementById('emptyState')?.classList.remove('hidden');
+      }
+    }
+
+    function populateCategories() {
+      const categoryFilter = document.getElementById('categoryFilter') as HTMLSelectElement;
+      if (categoryFilter) {
+        allCategories.forEach(cat => {
+          const option = document.createElement('option');
+          option.value = cat.id;
+          option.textContent = cat.name;
+          categoryFilter.appendChild(option);
+        });
+      }
+    }
+
+    function getCategoryColor(categoryName: string): string {
+      const colors: Record<string, string> = {
+        'Powder': 'bg-green-500/20 text-green-400',
+        'Khakhra': 'bg-yellow-500/20 text-yellow-400',
+        'Jelly': 'bg-blue-500/20 text-blue-400',
+        'Cookies': 'bg-purple-500/20 text-purple-400',
+      };
+      return colors[categoryName] || 'bg-gray-500/20 text-gray-400';
+    }
+
+    function getStatusBadge(status: string): string {
+      return status === 'published' 
+        ? 'bg-green-500/20 text-green-400'
+        : 'bg-yellow-500/20 text-yellow-400';
+    }
+
+    function renderProducts() {
+      const grid = document.getElementById('productsGrid');
+      const emptyState = document.getElementById('emptyState');
+      
+      if (!grid || !emptyState) return;
+
+      const searchInput = (document.getElementById('searchInput') as HTMLInputElement)?.value.toLowerCase() || '';
+      const categoryFilter = (document.getElementById('categoryFilter') as HTMLSelectElement)?.value || '';
+      const statusFilter = (document.getElementById('statusFilter') as HTMLSelectElement)?.value || '';
+      const sortFilter = (document.getElementById('sortFilter') as HTMLSelectElement)?.value || 'newest';
+
+      // Filter products
+      let filtered = allProducts.filter(product => {
+        const matchesSearch = !searchInput || 
+          product.name?.toLowerCase().includes(searchInput) ||
+          product.short_description?.toLowerCase().includes(searchInput);
+        const matchesCategory = !categoryFilter || product.category_id == categoryFilter;
+        const matchesStatus = !statusFilter || product.status === statusFilter;
+        
+        return matchesSearch && matchesCategory && matchesStatus;
+      });
+
+      // Sort products
+      filtered.sort((a, b) => {
+        switch (sortFilter) {
+          case 'newest':
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          case 'oldest':
+            return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          case 'price_low':
+            return parseFloat(a.price) - parseFloat(b.price);
+          case 'price_high':
+            return parseFloat(b.price) - parseFloat(a.price);
+          case 'name':
+            return a.name.localeCompare(b.name);
+          default:
+            return 0;
+        }
+      });
+
+      // Pagination
+      const totalPages = Math.ceil(filtered.length / productsPerPage);
+      const startIndex = (currentPage - 1) * productsPerPage;
+      const endIndex = startIndex + productsPerPage;
+      const paginatedProducts = filtered.slice(startIndex, endIndex);
+
+      // Show/hide empty state
+      if (filtered.length === 0) {
+        grid.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        return;
+      } else {
+        grid.classList.remove('hidden');
+        emptyState.classList.add('hidden');
+      }
+
+      // Render products
+      grid.innerHTML = paginatedProducts.map(product => {
+        const category = allCategories.find(c => c.id === product.category_id);
+        const categoryName = category?.name || 'Unknown';
+        const categoryColor = getCategoryColor(categoryName);
+        const statusColor = getStatusBadge(product.status || 'draft');
+        const imageUrl = product.image_path ? `${UPLOADS_URL}/${product.image_path}` : '';
+        
+        return `
+          <div class="bg-gray-800/50 backdrop-blur-sm border border-green-500/30 rounded-xl overflow-hidden hover:border-green-500/50 transition-all">
+            <div class="aspect-square bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center overflow-hidden relative">
+              ${imageUrl 
+                ? `<img src="${imageUrl}" alt="${product.name}" class="w-full h-full object-cover absolute inset-0" onerror="this.style.display='none';" />`
+                : `<svg class="w-16 h-16 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                   </svg>`
+              }
+              ${imageUrl ? `<svg class="w-16 h-16 text-gray-600 z-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>` : ''}
+            </div>
+            <div class="p-4">
+              <div class="flex items-start justify-between mb-2">
+                <div>
+                  <span class="text-xs px-2 py-1 ${categoryColor} rounded-full">${categoryName}</span>
+                  <h3 class="text-lg font-bold text-white mt-2">${product.name}</h3>
+                </div>
+                <span class="text-xs px-2 py-1 ${statusColor} rounded-full capitalize">${product.is_active ? 'Active' : 'Inactive'}</span>
+              </div>
+              <p class="text-sm text-gray-400 mb-3 line-clamp-2">${product.description || 'No description'}</p>
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-xl font-bold text-yellow-400">₹${parseFloat(product.price).toFixed(2)}</span>
+                <span class="text-sm text-gray-400">Stock: ${product.stock_quantity || 0}</span>
+              </div>
+              <div class="flex gap-2">
+                <a
+                  href="/admin/products/edit/${product.id}"
+                  class="flex-1 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 font-medium rounded-lg transition-all text-center"
+                >
+                  Edit
+                </a>
+                <button
+                  onclick="deleteProduct(${product.id}, '${product.name.replace(/'/g, "\\'")}')"
+                  class="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 font-medium rounded-lg transition-all"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Update pagination
+      updatePagination(filtered.length, totalPages);
+    }
+
+    function updatePagination(totalItems: number, totalPages: number) {
+      const info = document.getElementById('paginationInfo');
+      const buttons = document.getElementById('paginationButtons');
+      
+      if (!info || !buttons) return;
+
+      const startIndex = (currentPage - 1) * productsPerPage + 1;
+      const endIndex = Math.min(currentPage * productsPerPage, totalItems);
+      
+      info.textContent = `Showing ${startIndex}-${endIndex} of ${totalItems} products`;
+      
+      buttons.innerHTML = `
+        <button 
+          onclick="changePage(${currentPage - 1})"
+          ${currentPage === 1 ? 'disabled' : ''}
+          class="px-4 py-2 bg-gray-800/50 border border-gray-600 text-gray-300 rounded-lg hover:border-green-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Previous
+        </button>
+        ${Array.from({ length: totalPages }, (_, i) => i + 1).map(page => `
+          <button 
+            onclick="changePage(${page})"
+            class="px-4 py-2 ${page === currentPage 
+              ? 'bg-green-500/20 border border-green-500 text-green-400' 
+              : 'bg-gray-800/50 border border-gray-600 text-gray-300 hover:border-green-500/50'
+            } rounded-lg transition-all"
+          >
+            ${page}
+          </button>
+        `).join('')}
+        <button 
+          onclick="changePage(${currentPage + 1})"
+          ${currentPage === totalPages ? 'disabled' : ''}
+          class="px-4 py-2 bg-gray-800/50 border border-gray-600 text-gray-300 rounded-lg hover:border-green-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Next
+        </button>
+      `;
+    }
+
+    (window as any).changePage = function(page: number) {
+      currentPage = page;
+      renderProducts();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    (window as any).deleteProduct = async function(id: number, name: string) {
+      if (!confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
+        return;
+      }
+
+      try {
+        const response = await productService.deleteProduct(id);
+
+        if (response.success) {
+          alert('Product deleted successfully!');
+          allProducts = allProducts.filter(p => p.id !== id);
+          renderProducts();
+        } else {
+          throw new Error('Failed to delete product');
+        }
+      } catch (error) {
+        console.error('Error deleting product:', error);
+        alert('Failed to delete product. Please try again.');
+      }
+    };
+
+    // Add event listeners for filters
+    document.getElementById('searchInput')?.addEventListener('input', () => {
+      currentPage = 1;
+      renderProducts();
+    });
+    
+    document.getElementById('categoryFilter')?.addEventListener('change', () => {
+      currentPage = 1;
+      renderProducts();
+    });
+    
+    document.getElementById('statusFilter')?.addEventListener('change', () => {
+      currentPage = 1;
+      renderProducts();
+    });
+    
+    document.getElementById('sortFilter')?.addEventListener('change', () => {
+      currentPage = 1;
+      renderProducts();
+    });
+
+    // Load data on page load
+    loadData();
+  </script>

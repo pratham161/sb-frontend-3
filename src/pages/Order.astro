@@ -1,0 +1,546 @@
+---
+import Layout from "../layouts/Layout.astro";
+import NavBar from "../components/NavBar.astro";
+import Footer from "../components/Footer.astro";
+---
+
+<Layout>
+  <NavBar />
+
+  <main class="bg-gradient-to-b from-gray-900 to-black text-white min-h-screen py-20 px-4">
+    <div class="max-w-7xl mx-auto">
+      <h1 class="text-3xl md:text-4xl font-bold text-yellow-400 mb-8 text-center">Checkout</h1>
+
+      <!-- Empty Cart Message -->
+      <div id="emptyCart" class="hidden text-center py-20">
+        <div class="text-6xl mb-4">🛒</div>
+        <h2 class="text-2xl font-bold mb-4">Your Cart is Empty</h2>
+        <p class="text-gray-400 mb-8">Add some products to get started!</p>
+        <a href="/#products" class="inline-block px-8 py-3 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 transition-all">
+          Browse Products
+        </a>
+      </div>
+
+      <!-- Checkout Content -->
+      <div id="checkoutContent" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Left: Customer Details Form -->
+        <div class="lg:col-span-2 space-y-6">
+          <!-- Contact Information -->
+          <section class="bg-gray-800/40 border border-green-500/20 rounded-2xl p-6 backdrop-blur">
+            <h2 class="text-xl font-bold text-white mb-4">Contact Information</h2>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2" for="email">Email Address *</label>
+                <input 
+                  type="email" 
+                  id="email" 
+                  required
+                  class="w-full px-4 py-3 bg-gray-900/50 border border-green-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-400/20 transition-all"
+                  placeholder="you@example.com"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2" for="phone">Phone Number *</label>
+                <input 
+                  type="tel" 
+                  id="phone" 
+                  required
+                  pattern="[0-9]{10}"
+                  class="w-full px-4 py-3 bg-gray-900/50 border border-green-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-400/20 transition-all"
+                  placeholder="10-digit mobile number"
+                />
+              </div>
+            </div>
+          </section>
+
+          <!-- Shipping Address -->
+          <section class="bg-gray-800/40 border border-green-500/20 rounded-2xl p-6 backdrop-blur">
+            <h2 class="text-xl font-bold text-white mb-4">Shipping Address</h2>
+            <div class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-300 mb-2" for="firstName">First Name *</label>
+                  <input 
+                    type="text" 
+                    id="firstName" 
+                    required
+                    class="w-full px-4 py-3 bg-gray-900/50 border border-green-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-400/20 transition-all"
+                    placeholder="John"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-300 mb-2" for="lastName">Last Name *</label>
+                  <input 
+                    type="text" 
+                    id="lastName" 
+                    required
+                    class="w-full px-4 py-3 bg-gray-900/50 border border-green-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-400/20 transition-all"
+                    placeholder="Doe"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2" for="address">Street Address *</label>
+                <input 
+                  type="text" 
+                  id="address" 
+                  required
+                  class="w-full px-4 py-3 bg-gray-900/50 border border-green-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-400/20 transition-all"
+                  placeholder="123 Main Street"
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2" for="apartment">Apartment, suite, etc. (optional)</label>
+                <input 
+                  type="text" 
+                  id="apartment" 
+                  class="w-full px-4 py-3 bg-gray-900/50 border border-green-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-400/20 transition-all"
+                  placeholder="Apt 4B"
+                />
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-300 mb-2" for="city">City *</label>
+                  <input 
+                    type="text" 
+                    id="city" 
+                    required
+                    class="w-full px-4 py-3 bg-gray-900/50 border border-green-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-400/20 transition-all"
+                    placeholder="Mumbai"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-300 mb-2" for="state">State *</label>
+                  <input 
+                    type="text" 
+                    id="state" 
+                    required
+                    class="w-full px-4 py-3 bg-gray-900/50 border border-green-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-400/20 transition-all"
+                    placeholder="Maharashtra"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-300 mb-2" for="pincode">PIN Code *</label>
+                  <input 
+                    type="text" 
+                    id="pincode" 
+                    required
+                    pattern="[0-9]{6}"
+                    class="w-full px-4 py-3 bg-gray-900/50 border border-green-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-green-400 focus:ring-2 focus:ring-green-400/20 transition-all"
+                    placeholder="400001"
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Payment Method -->
+          <section class="bg-gray-800/40 border border-green-500/20 rounded-2xl p-6 backdrop-blur">
+            <h2 class="text-xl font-bold text-white mb-4">Payment Method</h2>
+            <div class="space-y-3">
+              <label class="flex items-center p-4 bg-gray-900/50 border border-green-500/30 rounded-lg cursor-pointer hover:border-green-400 transition-all">
+                <input 
+                  type="radio" 
+                  name="paymentMethod" 
+                  value="razorpay" 
+                  checked
+                  class="mr-3"
+                />
+                <div class="flex-1">
+                  <div class="font-semibold text-white">💳 Pay with Razorpay</div>
+                  <div class="text-xs text-gray-400 mt-1">Credit/Debit Card, UPI, Net Banking, Wallets</div>
+                </div>
+                <div class="text-green-400 font-bold">Secure</div>
+              </label>
+              
+              <label class="flex items-center p-4 bg-gray-900/50 border border-green-500/30 rounded-lg cursor-pointer hover:border-green-400 transition-all">
+                <input 
+                  type="radio" 
+                  name="paymentMethod" 
+                  value="cod" 
+                  class="mr-3"
+                />
+                <div class="flex-1">
+                  <div class="font-semibold text-white">💵 Cash on Delivery</div>
+                  <div class="text-xs text-gray-400 mt-1">Pay when you receive</div>
+                </div>
+              </label>
+            </div>
+          </section>
+        </div>
+
+        <!-- Right: Order Summary -->
+        <div class="lg:col-span-1">
+          <div class="bg-gray-800/40 border border-green-500/20 rounded-2xl p-6 backdrop-blur sticky top-24">
+            <h2 class="text-xl font-bold text-white mb-4">Order Summary</h2>
+            
+            <!-- Cart Items -->
+            <div id="cartItems" class="space-y-3 mb-6 max-h-64 overflow-y-auto">
+              <!-- Items will be loaded here -->
+            </div>
+
+            <!-- Order Totals -->
+            <div class="space-y-2 pt-4 border-t border-green-500/20">
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-400">Subtotal</span>
+                <span class="text-white" id="subtotal">₹0</span>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-400">Shipping</span>
+                <span class="text-white" id="shipping">₹50</span>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-400">Tax (GST 5%)</span>
+                <span class="text-white" id="tax">₹0</span>
+              </div>
+              <div class="flex justify-between text-lg font-bold pt-2 border-t border-green-500/20">
+                <span class="text-yellow-400">Total</span>
+                <span class="text-yellow-400" id="total">₹0</span>
+              </div>
+            </div>
+
+            <!-- Place Order Button -->
+            <button 
+              id="placeOrderBtn"
+              class="w-full mt-6 px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold rounded-lg hover:from-green-600 hover:to-green-700 transform hover:scale-105 transition-all shadow-lg"
+            >
+              Place Order
+            </button>
+
+            <!-- Security Badge -->
+            <div class="mt-4 flex items-center justify-center gap-2 text-xs text-gray-400">
+              <svg class="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+              </svg>
+              <span>Secure checkout powered by Razorpay</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<script>
+  import { orderService } from '../services/orderService';
+  import { paymentService } from '../services/paymentService';
+
+  // Cart utility functions
+  const CART_KEY = 'symbicroft_cart';
+
+  const cart = {
+    getItems() {
+      if (typeof window === 'undefined') return [];
+      const cartData = localStorage.getItem(CART_KEY);
+      return cartData ? JSON.parse(cartData) : [];
+    },
+    
+    clearCart() {
+      localStorage.removeItem(CART_KEY);
+      window.dispatchEvent(new CustomEvent('cartUpdated', { detail: { items: [], total: 0 } }));
+    }
+  };
+
+  // Razorpay types
+  declare global {
+    interface Window {
+      Razorpay: any;
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadCart();
+    setupEventListeners();
+  });
+
+  function loadCart() {
+    const items = cart.getItems();
+    const emptyCart = document.getElementById('emptyCart');
+    const checkoutContent = document.getElementById('checkoutContent');
+    
+    if (items.length === 0) {
+      emptyCart?.classList.remove('hidden');
+      checkoutContent?.classList.add('hidden');
+      return;
+    }
+
+    emptyCart?.classList.add('hidden');
+    checkoutContent?.classList.remove('hidden');
+
+    displayCartItems(items);
+    calculateTotals(items);
+  }
+
+  function displayCartItems(items: any[]) {
+    const cartItemsContainer = document.getElementById('cartItems');
+    if (!cartItemsContainer) return;
+
+    cartItemsContainer.innerHTML = items.map(item => `
+      <div class="flex items-center gap-3 p-3 bg-gray-900/50 rounded-lg border border-green-500/20">
+        <img 
+          src="${item.image_path || '/productimages/default.png'}" 
+          alt="${item.product_name}" 
+          class="w-16 h-16 object-cover rounded-lg"
+        />
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-white truncate">${item.product_name}</p>
+          <p class="text-xs text-gray-400">Qty: ${item.quantity} × ₹${item.product_price}</p>
+        </div>
+        <p class="text-sm font-bold text-yellow-400">₹${item.product_price * item.quantity}</p>
+      </div>
+    `).join('');
+  }
+
+  function calculateTotals(items: any[]) {
+    const subtotal = items.reduce((sum, item) => sum + (item.product_price * item.quantity), 0);
+    const shipping = 50;
+    const tax = Math.round(subtotal * 0.05);
+    const total = subtotal + shipping + tax;
+
+    document.getElementById('subtotal')!.textContent = `₹${subtotal}`;
+    document.getElementById('shipping')!.textContent = `₹${shipping}`;
+    document.getElementById('tax')!.textContent = `₹${tax}`;
+    document.getElementById('total')!.textContent = `₹${total}`;
+  }
+
+  function setupEventListeners() {
+    const placeOrderBtn = document.getElementById('placeOrderBtn');
+    placeOrderBtn?.addEventListener('click', handlePlaceOrder);
+  }
+
+  async function handlePlaceOrder() {
+    // Validate form
+    const formData = getFormData();
+    if (!formData) return;
+
+    const items = cart.getItems();
+    if (items.length === 0) {
+      alert('Your cart is empty!');
+      return;
+    }
+
+    const paymentMethod = (document.querySelector('input[name="paymentMethod"]:checked') as HTMLInputElement)?.value;
+    
+    if (paymentMethod === 'razorpay') {
+      await handleRazorpayPayment(formData, items);
+    } else {
+      await handleCODOrder(formData, items);
+    }
+  }
+
+  function getFormData() {
+    const email = (document.getElementById('email') as HTMLInputElement)?.value.trim();
+    const phone = (document.getElementById('phone') as HTMLInputElement)?.value.trim();
+    const firstName = (document.getElementById('firstName') as HTMLInputElement)?.value.trim();
+    const lastName = (document.getElementById('lastName') as HTMLInputElement)?.value.trim();
+    const address = (document.getElementById('address') as HTMLInputElement)?.value.trim();
+    const apartment = (document.getElementById('apartment') as HTMLInputElement)?.value.trim();
+    const city = (document.getElementById('city') as HTMLInputElement)?.value.trim();
+    const state = (document.getElementById('state') as HTMLInputElement)?.value.trim();
+    const pincode = (document.getElementById('pincode') as HTMLInputElement)?.value.trim();
+
+    if (!email || !phone || !firstName || !lastName || !address || !city || !state || !pincode) {
+      alert('Please fill in all required fields');
+      return null;
+    }
+
+    if (!/^[0-9]{10}$/.test(phone)) {
+      alert('Please enter a valid 10-digit phone number');
+      return null;
+    }
+
+    if (!/^[0-9]{6}$/.test(pincode)) {
+      alert('Please enter a valid 6-digit PIN code');
+      return null;
+    }
+
+    return { email, phone, firstName, lastName, address, apartment, city, state, pincode };
+  }
+
+  async function handleRazorpayPayment(formData: any, items: any[]) {
+    const placeOrderBtn = document.getElementById('placeOrderBtn') as HTMLButtonElement;
+    
+    try {
+      placeOrderBtn.textContent = 'Processing...';
+      placeOrderBtn.disabled = true;
+
+      // Calculate total
+      const subtotal = items.reduce((sum, item) => sum + (item.product_price * item.quantity), 0);
+      const total = subtotal + 50 + Math.round(subtotal * 0.05);
+
+      // Create Razorpay order
+      const razorpayOrderResponse = await paymentService.createRazorpayOrder(
+        total,
+        `order_${Date.now()}`,
+        { customer: formData.email }
+      );
+
+      if (!razorpayOrderResponse.success) {
+        throw new Error('Failed to create payment order');
+      }
+
+      // Open Razorpay checkout
+      const options = {
+        key: 'rzp_test_WcTzuZCzUCX2z4', // Replace with your Razorpay Key ID from .env
+        amount: razorpayOrderResponse.order.amount,
+        currency: razorpayOrderResponse.order.currency,
+        name: 'Symbicroft',
+        description: 'Order Payment',
+        order_id: razorpayOrderResponse.order.id,
+        prefill: {
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          contact: formData.phone
+        },
+        theme: {
+          color: '#22c55e'
+        },
+        handler: async function (response: any) {
+          await handlePaymentSuccess(response, formData, items, razorpayOrderResponse.order.id);
+        },
+        modal: {
+          ondismiss: function() {
+            placeOrderBtn.textContent = 'Place Order';
+            placeOrderBtn.disabled = false;
+          }
+        }
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+
+    } catch (error) {
+      console.error('Payment error:', error);
+      alert('Failed to initiate payment. Please try again.');
+      placeOrderBtn.textContent = 'Place Order';
+      placeOrderBtn.disabled = false;
+    }
+  }
+
+  async function handlePaymentSuccess(razorpayResponse: any, formData: any, items: any[], razorpayOrderId: string) {
+    try {
+      // Create order in backend
+      const orderData = {
+        customer_email: formData.email,
+        customer_phone: formData.phone,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        address: formData.address,
+        apartment: formData.apartment,
+        city: formData.city,
+        state: formData.state,
+        postal_code: formData.pincode,
+        country: 'India',
+        payment_method: 'Razorpay',
+        payment_gateway: 'Razorpay',
+        razorpay_order_id: razorpayOrderId,
+        items: items.map(item => ({
+          product_id: item.product_id,
+          product_name: item.product_name,
+          product_price: item.product_price,
+          quantity: item.quantity
+        }))
+      };
+
+      const orderResponse = await orderService.createOrder(orderData);
+
+      // Verify payment
+      const verificationData = {
+        razorpay_order_id: razorpayResponse.razorpay_order_id,
+        razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+        razorpay_signature: razorpayResponse.razorpay_signature,
+        order_id: orderResponse.order.order_id
+      };
+
+      const verificationResponse = await paymentService.verifyPayment(verificationData);
+
+      if (verificationResponse.success) {
+        // Clear cart and redirect
+        cart.clearCart();
+        window.location.href = `/order-success?orderId=${orderResponse.order.order_id}`;
+      } else {
+        alert('Payment verification failed. Please contact support.');
+      }
+
+    } catch (error) {
+      console.error('Order creation error:', error);
+      alert('Payment successful but order creation failed. Please contact support with payment ID: ' + razorpayResponse.razorpay_payment_id);
+    }
+  }
+
+  async function handleCODOrder(formData: any, items: any[]) {
+    const placeOrderBtn = document.getElementById('placeOrderBtn') as HTMLButtonElement;
+    
+    try {
+      placeOrderBtn.textContent = 'Placing Order...';
+      placeOrderBtn.disabled = true;
+
+      const orderData = {
+        customer_email: formData.email,
+        customer_phone: formData.phone,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        address: formData.address,
+        apartment: formData.apartment,
+        city: formData.city,
+        state: formData.state,
+        postal_code: formData.pincode,
+        country: 'India',
+        payment_method: 'COD',
+        payment_gateway: 'COD',
+        items: items.map(item => ({
+          product_id: item.product_id,
+          product_name: item.product_name,
+          product_price: item.product_price,
+          quantity: item.quantity
+        }))
+      };
+
+      const response = await orderService.createOrder(orderData);
+      
+      if (response.order) {
+        cart.clearCart();
+        window.location.href = `/order-success?orderId=${response.order.order_id}`;
+      } else {
+        alert('Failed to place order. Please try again.');
+      }
+
+    } catch (error) {
+      console.error('Order error:', error);
+      alert('An error occurred while placing your order. Please try again.');
+    } finally {
+      placeOrderBtn.textContent = 'Place Order';
+      placeOrderBtn.disabled = false;
+    }
+  }
+</script>
+
+<style>
+  input[type="radio"]:checked {
+    accent-color: #22c55e;
+  }
+
+  /* Custom scrollbar for cart items */
+  #cartItems::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  #cartItems::-webkit-scrollbar-track {
+    background: rgba(34, 197, 94, 0.1);
+    border-radius: 10px;
+  }
+
+  #cartItems::-webkit-scrollbar-thumb {
+    background: rgba(34, 197, 94, 0.3);
+    border-radius: 10px;
+  }
+
+  #cartItems::-webkit-scrollbar-thumb:hover {
+    background: rgba(34, 197, 94, 0.5);
+  }
+</style>

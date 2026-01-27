@@ -1,0 +1,475 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import JoditEditorWrapper from '../../../components/JoditEditorWrapper';
+---
+
+<AdminLayout title="New Article - Symbiocroft Admin">
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center gap-3 mb-4">
+      <a href="/admin/articles" class="text-gray-400 hover:text-white transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+      </a>
+      <div>
+        <h1 class="text-3xl font-bold text-white">Write New Article</h1>
+        <p class="text-gray-400">Create engaging content for your audience</p>
+      </div>
+    </div>
+  </div>
+
+  <form id="articleForm" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Main Content -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Basic Information -->
+      <div class="bg-gray-800/50 backdrop-blur-sm border border-green-500/30 rounded-xl p-6">
+        <h2 class="text-xl font-bold text-white mb-4">Article Details</h2>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Title *</label>
+            <input
+              type="text"
+              name="title"
+              required
+              placeholder="Enter article title"
+              class="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Slug (URL) *</label>
+            <input
+              type="text"
+              name="slug"
+              required
+              placeholder="article-url-slug"
+              class="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none"
+            />
+            <p class="text-xs text-gray-500 mt-1">Use lowercase with hyphens</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Excerpt *</label>
+            <textarea
+              name="excerpt"
+              rows="3"
+              required
+              placeholder="Brief summary for previews"
+              class="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none resize-none"
+            ></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rich Text Editor -->
+      <div class="bg-gray-800/50 backdrop-blur-sm border border-green-500/30 rounded-xl p-6">
+        <h2 class="text-xl font-bold text-white mb-4">Article Content *</h2>
+        <div id="editorContainer">
+          <JoditEditorWrapper client:only="react" value="" onChange={(content: string) => {
+            const input = document.getElementById('articleContent') as HTMLInputElement;
+            if (input) input.value = content;
+          }} />
+        </div>
+        <input type="hidden" id="articleContent" name="content" />
+      </div>
+
+      <!-- SEO Section -->
+      <div class="bg-gray-800/50 backdrop-blur-sm border border-green-500/30 rounded-xl p-6">
+        <h2 class="text-xl font-bold text-white mb-4">SEO Settings</h2>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Meta Title</label>
+            <input
+              type="text"
+              name="metaTitle"
+              placeholder="SEO title (leave empty to use article title)"
+              class="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Meta Description</label>
+            <textarea
+              name="metaDesc"
+              rows="2"
+              placeholder="SEO description"
+              class="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none resize-none"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Keywords</label>
+            <input
+              type="text"
+              name="keywords"
+              placeholder="spirulina, health, nutrition"
+              class="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none"
+            />
+            <p class="text-xs text-gray-500 mt-1">Separate with commas</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+      <!-- Publishing -->
+      <div class="bg-gray-800/50 backdrop-blur-sm border border-green-500/30 rounded-xl p-6">
+        <h2 class="text-xl font-bold text-white mb-4">Publishing</h2>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Status</label>
+            <select
+              name="status"
+              class="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none"
+            >
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+              <option value="scheduled">Scheduled</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Publish Date</label>
+            <input
+              type="datetime-local"
+              name="publishDate"
+              class="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none"
+            />
+          </div>
+
+          <label class="flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="featured"
+              class="w-4 h-4 rounded border-gray-600 bg-gray-900/50 text-green-500 focus:ring-green-500/20"
+            />
+            <span class="text-sm text-gray-300">Featured Article</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Category & Tags -->
+      <div class="bg-gray-800/50 backdrop-blur-sm border border-green-500/30 rounded-xl p-6">
+        <h2 class="text-xl font-bold text-white mb-4">Organization</h2>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Category *</label>
+            <select
+              name="category"
+              required
+              class="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none"
+            >
+              <option value="">Select Category</option>
+              <option value="health">Health</option>
+              <option value="recipes">Recipes</option>
+              <option value="news">News</option>
+              <option value="research">Research</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Tags</label>
+            <input
+              type="text"
+              name="tags"
+              placeholder="tag1, tag2, tag3"
+              class="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none"
+            />
+            <p class="text-xs text-gray-500 mt-1">Separate with commas</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Author *</label>
+            <input
+              type="text"
+              name="author"
+              required
+              placeholder="Author name"
+              class="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Featured Image -->
+      <div class="bg-gray-800/50 backdrop-blur-sm border border-green-500/30 rounded-xl p-6">
+        <h2 class="text-xl font-bold text-white mb-4">Featured Image</h2>
+        
+        <input type="file" id="imageInput" name="image" accept="image/*" class="hidden" />
+        <input type="hidden" id="imageDataInput" name="featuredImage" />
+        
+        <div 
+          id="dropZone"
+          class="aspect-video bg-gray-900/50 border-2 border-dashed border-gray-600 rounded-lg flex items-center justify-center cursor-pointer hover:border-green-500/50 transition-all relative overflow-hidden group"
+        >
+          <div id="previewContainer" class="hidden absolute inset-0">
+            <img id="imagePreview" src="" alt="Preview" class="w-full h-full object-cover" />
+            <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+              <button type="button" id="changeImageBtn" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-all">
+                Change
+              </button>
+              <button type="button" id="removeImageBtn" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-all">
+                Remove
+              </button>
+            </div>
+          </div>
+          <div id="uploadPrompt" class="text-center p-6">
+            <svg class="w-16 h-16 text-gray-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+            </svg>
+            <p class="text-white font-semibold mb-2">Drop image here or click to upload</p>
+            <p class="text-sm text-gray-400">PNG, JPG, GIF up to 10MB</p>
+          </div>
+        </div>
+        <p id="fileName" class="text-sm text-gray-400 mt-2 text-center hidden"></p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="bg-gray-800/50 backdrop-blur-sm border border-green-500/30 rounded-xl p-6">
+        <div class="space-y-3">
+          <button
+            type="submit"
+            class="w-full py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-lg transition-all duration-200 transform active:scale-95"
+          >
+            Publish Article
+          </button>
+          <button
+            type="button"
+            id="saveDraftBtn"
+            class="w-full py-3 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 font-semibold rounded-lg transition-all"
+          >
+            Save as Draft
+          </button>
+          <a
+            href="/admin/articles"
+            class="block w-full py-3 bg-gray-700/50 hover:bg-gray-700/70 text-gray-300 font-semibold rounded-lg transition-all text-center"
+          >
+            Cancel
+          </a>
+        </div>
+      </div>
+    </div>
+  </form>
+</AdminLayout>
+
+<script>
+  // Image upload functionality
+  const dropZone = document.getElementById('dropZone');
+  const imageInput = document.getElementById('imageInput') as HTMLInputElement;
+  const imageDataInput = document.getElementById('imageDataInput') as HTMLInputElement;
+  const imagePreview = document.getElementById('imagePreview') as HTMLImageElement;
+  const previewContainer = document.getElementById('previewContainer');
+  const uploadPrompt = document.getElementById('uploadPrompt');
+  const fileName = document.getElementById('fileName');
+  const changeImageBtn = document.getElementById('changeImageBtn');
+  const removeImageBtn = document.getElementById('removeImageBtn');
+  
+  let selectedFile: File | null = null;
+
+  // Click to upload
+  dropZone?.addEventListener('click', (e) => {
+    if (!(e.target as HTMLElement).closest('button')) {
+      imageInput?.click();
+    }
+  });
+
+  // File input change
+  imageInput?.addEventListener('change', (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (file) {
+      handleFile(file);
+    }
+  });
+
+  // Drag and drop
+  dropZone?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('border-green-500', 'bg-green-500/5');
+  });
+
+  dropZone?.addEventListener('dragleave', () => {
+    dropZone.classList.remove('border-green-500', 'bg-green-500/5');
+  });
+
+  dropZone?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('border-green-500', 'bg-green-500/5');
+    
+    const file = e.dataTransfer?.files[0];
+    if (file && file.type.startsWith('image/')) {
+      handleFile(file);
+    } else {
+      alert('Please drop an image file');
+    }
+  });
+
+  // Handle file selection
+  function handleFile(file: File) {
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size must be less than 10MB');
+      return;
+    }
+
+    selectedFile = file;
+    const reader = new FileReader();
+    
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      imagePreview.src = result;
+      imageDataInput.value = result;
+      previewContainer?.classList.remove('hidden');
+      uploadPrompt?.classList.add('hidden');
+      if (fileName) {
+        fileName.textContent = file.name;
+        fileName.classList.remove('hidden');
+      }
+    };
+    
+    reader.readAsDataURL(file);
+  }
+
+  // Change image
+  changeImageBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    imageInput?.click();
+  });
+
+  // Remove image
+  removeImageBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    selectedFile = null;
+    imagePreview.src = '';
+    imageDataInput.value = '';
+    if (imageInput) imageInput.value = '';
+    previewContainer?.classList.add('hidden');
+    uploadPrompt?.classList.remove('hidden');
+    fileName?.classList.add('hidden');
+  });
+
+  // Form submission
+  const articleForm = document.getElementById('articleForm');
+  if (articleForm) {
+    articleForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const submitBtn = articleForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Publishing Article...';
+      }
+
+      try {
+        const formData = new FormData(articleForm as HTMLFormElement);
+        const content = (document.getElementById('articleContent') as HTMLInputElement)?.value;
+
+        // Create article first
+        const articleData = {
+          title: formData.get('title') as string,
+          excerpt: formData.get('excerpt') as string,
+          content: content,
+          author: formData.get('author') as string,
+          is_published: formData.get('status') === 'published'
+        };
+
+        console.log('Sending article data:', articleData);
+        
+        const response = await fetch('http://localhost:5000/api/articles', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          },
+          body: JSON.stringify(articleData)
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to create article');
+        }
+
+        const result = await response.json();
+        const articleId = result.data?.id || result.article?.id;
+        console.log('Article created:', result);
+
+        // Upload image if selected
+        if (selectedFile && articleId) {
+          const imageFormData = new FormData();
+          imageFormData.append('image', selectedFile);
+
+          const uploadResponse = await fetch(`http://localhost:5000/api/articles/${articleId}/image`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            },
+            body: imageFormData
+          });
+
+          if (!uploadResponse.ok) {
+            console.error('Failed to upload image, but article was created');
+          } else {
+            console.log('Image uploaded successfully');
+          }
+        }
+        
+        alert('Article published successfully!');
+        window.location.href = '/admin/articles';
+      } catch (error) {
+        console.error('Error creating article:', error);
+        alert(`Error: ${error instanceof Error ? error.message : 'Failed to create article'}`);
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Publish Article';
+        }
+      }
+    });
+  }
+
+  // Save draft
+  const saveDraftBtn = document.getElementById('saveDraftBtn');
+  if (saveDraftBtn) {
+    saveDraftBtn.addEventListener('click', () => {
+      const statusSelect = document.querySelector('select[name="status"]') as HTMLSelectElement;
+      if (statusSelect) {
+        statusSelect.value = 'draft';
+      }
+      articleForm?.dispatchEvent(new Event('submit'));
+    });
+  }
+</script>
+
+<style is:global>
+  /* Jodit Editor Dark Theme Styles */
+  .jodit-editor-wrapper {
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+
+  .jodit-container {
+    border: 0;
+  }
+
+  .jodit-wysiwyg {
+    background-color: rgba(17, 24, 39, 0.5);
+    color: white;
+  }
+
+  .jodit-toolbar-button {
+    color: #d1d5db;
+  }
+
+  .jodit-toolbar-button:hover {
+    background-color: rgba(34, 197, 94, 0.2);
+  }
+
+  .jodit-status-bar {
+    background-color: rgba(31, 41, 55, 0.5);
+    border-top: 1px solid #374151;
+  }
+</style>

@@ -1,0 +1,109 @@
+---
+---
+
+<div id="hero" class="relative w-full min-h-screen flex items-center justify-center overflow-hidden">
+	<!-- Background Image Slider -->
+	<div class="absolute inset-0 z-0">
+		<div id="heroSlider" class="relative w-full h-full">
+			<!-- Slide 1 -->
+			<div class="hero-slide absolute inset-0 transition-opacity duration-1000 opacity-100">
+				<img src="/plant/plant1.jpeg" alt="Hero Slide 1" class="w-full h-full object-cover" />
+			</div>
+			<!-- Slide 2 -->
+			<div class="hero-slide absolute inset-0 transition-opacity duration-1000 opacity-0">
+				<img src="/plant/plant2.jpeg" alt="Hero Slide 2" class="w-full h-full object-cover" />
+			</div>
+			<!-- Slide 3 -->
+			<div class="hero-slide absolute inset-0 transition-opacity duration-1000 opacity-0">
+				<img src="/plant/plant3.jpeg" alt="Hero Slide 3" class="w-full h-full object-cover" />
+			</div>
+			<!-- Slide 4 -->
+			<div class="hero-slide absolute inset-0 transition-opacity duration-1000 opacity-0">
+				<img src="/plant/plant4.jpeg" alt="Hero Slide 4" class="w-full h-full object-cover" />
+			</div>
+		</div>
+
+		<!-- Dark Overlay for Text Visibility -->
+		<div class="absolute inset-0 bg-black/50 z-10"></div>
+	</div>
+
+	<!-- Content Overlay -->
+	<div class="relative z-20 max-w-4xl mx-auto text-center px-6 py-20">
+		<h1 class="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-tight text-yellow-400 mb-6">
+			Transform Your Wellness Journey
+		</h1>
+		
+		<p class="text-lg md:text-xl text-white max-w-2xl mx-auto mb-10">
+			Discover premium spirulina-based products that nourish your body and elevate your health with pure, potent, and purposeful nutrition.
+		</p>
+
+		<!-- CTA Buttons -->
+		<div class="flex flex-col sm:flex-row gap-4 justify-center">
+			<a 
+				href="#products"
+				class="px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-black font-bold text-lg rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:shadow-green-500/50 active:scale-95"
+			>
+				Shop Now
+			</a>
+			<a 
+				href="#about"
+				class="px-8 py-4 border-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black font-bold text-lg rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-yellow-400/50 active:scale-95"
+			>
+				Learn More
+			</a>
+		</div>
+
+		<!-- Scroll Indicator -->
+		<div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+			<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+			</svg>
+		</div>
+	</div>
+</div>
+
+<script>
+	const slides = document.querySelectorAll('.hero-slide');
+	let currentSlide = 0;
+	const slideCount = slides.length;
+	const slideInterval = 5000; // Change slide every 5 seconds
+
+	function showSlide(index: number) {
+		slides.forEach((slide, i) => {
+			if (i === index) {
+				slide.classList.remove('opacity-0');
+				slide.classList.add('opacity-100');
+			} else {
+				slide.classList.remove('opacity-100');
+				slide.classList.add('opacity-0');
+			}
+		});
+	}
+
+	function nextSlide() {
+		currentSlide = (currentSlide + 1) % slideCount;
+		showSlide(currentSlide);
+	}
+
+	// Auto-rotate slides
+	setInterval(nextSlide, slideInterval);
+
+	// Initialize first slide
+	showSlide(0);
+</script>
+
+<style>
+	#hero {
+		min-height: 100vh;
+	}
+
+	.hero-slide {
+		transition: opacity 1s ease-in-out;
+	}
+
+	@media (max-width: 768px) {
+		#hero {
+			min-height: 60vh;
+		}
+	}
+</style>

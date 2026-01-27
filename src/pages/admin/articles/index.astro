@@ -1,0 +1,279 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Articles - Symbiocroft Admin">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-white mb-2">Articles Management</h1>
+      <p class="text-gray-400">Manage blog posts and content</p>
+    </div>
+    <a
+      href="/admin/articles/new"
+      class="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-lg transition-all duration-200 transform active:scale-95 shadow-lg hover:shadow-green-500/20 flex items-center gap-2"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+      </svg>
+      New Article
+    </a>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-gray-800/50 backdrop-blur-sm border border-green-500/30 rounded-xl p-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-400 mb-2">Search</label>
+        <input
+          type="text"
+          placeholder="Search articles..."
+          class="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none"
+        />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-400 mb-2">Status</label>
+        <select class="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none">
+          <option>All Status</option>
+          <option>Published</option>
+          <option>Draft</option>
+          <option>Scheduled</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-400 mb-2">Category</label>
+        <select class="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none">
+          <option>All Categories</option>
+          <option>Health</option>
+          <option>Recipes</option>
+          <option>News</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-400 mb-2">Sort By</label>
+        <select class="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none">
+          <option>Newest First</option>
+          <option>Oldest First</option>
+          <option>Title: A to Z</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Articles Table -->
+  <div class="bg-gray-800/50 backdrop-blur-sm border border-green-500/30 rounded-xl overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-gray-700 bg-gray-900/50">
+            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-400">Title</th>
+            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-400">Author</th>
+            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-400">Status</th>
+            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-400">Date</th>
+            <th class="text-right py-4 px-6 text-sm font-semibold text-gray-400">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="articlesTableBody">
+          <!-- Loading state -->
+          <tr>
+            <td colspan="5" class="py-8 text-center">
+              <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mx-auto mb-4"></div>
+              <p class="text-gray-400">Loading articles...</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div id="paginationContainer" class="mt-8 flex items-center justify-between hidden">
+    <p id="paginationInfo" class="text-sm text-gray-400"></p>
+    <div id="paginationButtons" class="flex gap-2"></div>
+  </div>
+</AdminLayout>
+
+<script>
+  import { articleService } from '../../../services/articleService';
+  import { UPLOADS_URL } from '../../../utils/api';
+
+  let allArticles: any[] = [];
+  let currentPage = 1;
+  const articlesPerPage = 10;
+
+  async function loadArticles() {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        window.location.href = '/admin/login';
+        return;
+      }
+
+      const response = await articleService.getAllArticles();
+      
+      if (response.success) {
+        allArticles = response.data || [];
+        renderArticles();
+      } else {
+        throw new Error('Failed to load articles');
+      }
+    } catch (error) {
+      console.error('Error loading articles:', error);
+      const tbody = document.getElementById('articlesTableBody');
+      if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-red-400">Failed to load articles</td></tr>';
+      }
+    }
+  }
+
+  function renderArticles() {
+    const tbody = document.getElementById('articlesTableBody');
+    const paginationContainer = document.getElementById('paginationContainer');
+    
+    if (!tbody) return;
+
+    if (allArticles.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5" class="py-8 text-center">
+            <p class="text-gray-400 mb-4">No articles found</p>
+            <a href="/admin/articles/new" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-lg transition-all">
+              Create Your First Article
+            </a>
+          </td>
+        </tr>
+      `;
+      paginationContainer?.classList.add('hidden');
+      return;
+    }
+
+    // Pagination
+    const totalPages = Math.ceil(allArticles.length / articlesPerPage);
+    const startIndex = (currentPage - 1) * articlesPerPage;
+    const endIndex = startIndex + articlesPerPage;
+    const paginatedArticles = allArticles.slice(startIndex, endIndex);
+
+    tbody.innerHTML = paginatedArticles.map(article => {
+      const imageUrl = article.image_url ? `${UPLOADS_URL}/${article.image_url}` : '';
+      const statusColor = article.is_published ? 'bg-green-500/20 text-green-400' : 'bg-orange-500/20 text-orange-400';
+      const statusText = article.is_published ? 'Published' : 'Draft';
+      const date = new Date(article.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+      
+      return `
+        <tr class="border-b border-gray-700/50 hover:bg-gray-700/20 transition-colors">
+          <td class="py-4 px-6">
+            <div class="flex items-center gap-3">
+              <div class="w-16 h-16 bg-gradient-to-br from-green-600 to-green-800 rounded-lg flex-shrink-0 overflow-hidden">
+                ${imageUrl 
+                  ? `<img src="${imageUrl}" alt="${article.title}" class="w-full h-full object-cover" />`
+                  : ''
+                }
+              </div>
+              <div>
+                <h3 class="text-white font-semibold">${article.title}</h3>
+                <p class="text-sm text-gray-400 mt-1">${article.excerpt ? article.excerpt.substring(0, 50) + '...' : ''}</p>
+              </div>
+            </div>
+          </td>
+          <td class="py-4 px-6 text-gray-300">${article.author || 'Admin'}</td>
+          <td class="py-4 px-6">
+            <span class="text-xs px-2 py-1 ${statusColor} rounded-full">${statusText}</span>
+          </td>
+          <td class="py-4 px-6 text-gray-400 text-sm">${date}</td>
+          <td class="py-4 px-6">
+            <div class="flex items-center justify-end gap-2">
+              <a
+                href="/admin/articles/edit/${article.id}"
+                class="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-all"
+                title="Edit"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+              </a>
+              <button
+                onclick="deleteArticle(${article.id}, '${article.title.replace(/'/g, "\\'")}')"
+                class="px-3 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-all"
+                title="Delete"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    // Update pagination
+    if (allArticles.length > articlesPerPage) {
+      paginationContainer?.classList.remove('hidden');
+      updatePagination(allArticles.length, totalPages);
+    } else {
+      paginationContainer?.classList.add('hidden');
+    }
+  }
+
+  function updatePagination(totalItems: number, totalPages: number) {
+    const info = document.getElementById('paginationInfo');
+    const buttons = document.getElementById('paginationButtons');
+    
+    if (!info || !buttons) return;
+
+    const startIndex = (currentPage - 1) * articlesPerPage + 1;
+    const endIndex = Math.min(currentPage * articlesPerPage, totalItems);
+    
+    info.textContent = `Showing ${startIndex}-${endIndex} of ${totalItems} articles`;
+    
+    buttons.innerHTML = `
+      <button 
+        onclick="changePage(${currentPage - 1})"
+        ${currentPage === 1 ? 'disabled' : ''}
+        class="px-4 py-2 bg-gray-800/50 border border-gray-600 text-gray-300 rounded-lg hover:border-green-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Previous
+      </button>
+      <button class="px-4 py-2 bg-green-500/20 border border-green-500 text-green-400 rounded-lg">
+        ${currentPage}
+      </button>
+      <button 
+        onclick="changePage(${currentPage + 1})"
+        ${currentPage === totalPages ? 'disabled' : ''}
+        class="px-4 py-2 bg-gray-800/50 border border-gray-600 text-gray-300 rounded-lg hover:border-green-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Next
+      </button>
+    `;
+  }
+
+  (window as any).changePage = function(page: number) {
+    currentPage = page;
+    renderArticles();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  (window as any).deleteArticle = async function(id: number, title: string) {
+    if (!confirm(`Are you sure you want to delete "${title}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await articleService.deleteArticle(id);
+
+      if (response.success) {
+        alert('Article deleted successfully!');
+        allArticles = allArticles.filter(a => a.id !== id);
+        renderArticles();
+      } else {
+        throw new Error('Failed to delete article');
+      }
+    } catch (error) {
+      console.error('Error deleting article:', error);
+      alert('Failed to delete article. Please try again.');
+    }
+  };
+
+  // Load articles on page load
+  loadArticles();
+</script>

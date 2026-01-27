@@ -1,0 +1,246 @@
+---
+import Layout from "../layouts/Layout.astro";
+import NavBar from "../components/NavBar.astro";
+import Footer from "../components/Footer.astro";
+---
+
+<Layout>
+  <NavBar />
+
+  <main class="bg-gradient-to-b from-gray-900 to-black text-white min-h-screen py-20 px-4">
+    <div class="max-w-3xl mx-auto">
+      <!-- Success Animation -->
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-24 h-24 bg-green-500/20 rounded-full mb-6 animate-pulse">
+          <svg class="w-16 h-16 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold text-green-400 mb-4">Order Successful!</h1>
+        <p class="text-xl text-gray-300">Thank you for your purchase</p>
+      </div>
+
+      <!-- Order Details Card -->
+      <div class="bg-gray-800/40 border border-green-500/20 rounded-2xl p-8 backdrop-blur mb-6">
+        <div class="text-center mb-6">
+          <p class="text-gray-400 mb-2">Your Order ID</p>
+          <p id="orderId" class="text-3xl font-bold text-yellow-400 tracking-wider">-</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-green-500/20 pt-6">
+          <div>
+            <p class="text-sm text-gray-400 mb-1">Email</p>
+            <p id="customerEmail" class="text-white font-medium">-</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-400 mb-1">Phone</p>
+            <p id="customerPhone" class="text-white font-medium">-</p>
+          </div>
+          <div class="md:col-span-2">
+            <p class="text-sm text-gray-400 mb-1">Shipping Address</p>
+            <p id="shippingAddress" class="text-white font-medium">-</p>
+          </div>
+        </div>
+
+        <div class="border-t border-green-500/20 mt-6 pt-6">
+          <div class="flex justify-between items-center mb-4">
+            <span class="text-gray-400">Payment Status</span>
+            <span id="paymentStatus" class="px-4 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-semibold">
+              Paid
+            </span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-gray-400">Order Status</span>
+            <span id="orderStatus" class="px-4 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-sm font-semibold">
+              Processing
+            </span>
+          </div>
+        </div>
+
+        <div class="border-t border-green-500/20 mt-6 pt-6">
+          <h3 class="text-lg font-bold text-white mb-4">Order Items</h3>
+          <div id="orderItems" class="space-y-3">
+            <!-- Items will be loaded here -->
+          </div>
+        </div>
+
+        <div class="border-t border-green-500/20 mt-6 pt-6">
+          <div class="flex justify-between text-2xl font-bold">
+            <span class="text-white">Total Amount</span>
+            <span id="totalAmount" class="text-yellow-400">₹0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- What's Next -->
+      <div class="bg-gray-800/40 border border-green-500/20 rounded-2xl p-6 backdrop-blur mb-6">
+        <h2 class="text-xl font-bold text-white mb-4">What's Next?</h2>
+        <div class="space-y-3 text-gray-300">
+          <div class="flex items-start gap-3">
+            <span class="text-green-400 mt-1">✓</span>
+            <p>You will receive an order confirmation email shortly.</p>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="text-green-400 mt-1">✓</span>
+            <p>We'll notify you when your order is shipped.</p>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="text-green-400 mt-1">✓</span>
+            <p>Estimated delivery: 3-5 business days.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col md:flex-row gap-4 justify-center">
+        <a 
+          href="/"
+          class="px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold rounded-lg hover:from-green-600 hover:to-green-700 transform hover:scale-105 transition-all shadow-lg text-center"
+        >
+          Continue Shopping
+        </a>
+        <button 
+          onclick="window.print()"
+          class="px-8 py-4 bg-gray-800 border border-green-500/30 text-white font-bold rounded-lg hover:bg-gray-700 transition-all text-center"
+        >
+          Print Invoice
+        </button>
+      </div>
+
+      <!-- Support Contact -->
+      <div class="text-center mt-8 text-gray-400 text-sm">
+        <p>Need help? Contact us at <a href="mailto:support@symbicroft.com" class="text-green-400 hover:underline">support@symbicroft.com</a></p>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<script>
+  import { orderService } from '../services/orderService';
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    // Get order ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderIdParam = urlParams.get('orderId');
+
+    if (!orderIdParam) {
+      window.location.href = '/';
+      return;
+    }
+
+    // Convert to number and validate
+    const orderId = parseInt(orderIdParam, 10);
+    if (isNaN(orderId)) {
+      window.location.href = '/';
+      return;
+    }
+
+    // Display order ID immediately
+    const orderIdEl = document.getElementById('orderId');
+    if (orderIdEl) {
+      orderIdEl.textContent = orderIdParam; // Display original string
+    }
+
+    try {
+      // Fetch order details with numeric ID
+      const response = await orderService.getOrderById(orderId);
+      const order = response.data;
+
+      // Display order details
+      displayOrderDetails(order);
+    } catch (error) {
+      console.error('Error fetching order:', error);
+      alert('Failed to load order details');
+    }
+  });
+
+  function displayOrderDetails(order: any) {
+    // Customer info
+    const emailEl = document.getElementById('customerEmail');
+    const phoneEl = document.getElementById('customerPhone');
+    const addressEl = document.getElementById('shippingAddress');
+    
+    if (emailEl) emailEl.textContent = order.customer_email;
+    if (phoneEl) phoneEl.textContent = order.customer_phone;
+    if (addressEl) {
+      const fullAddress = `${order.first_name} ${order.last_name}, ${order.address}${order.apartment ? ', ' + order.apartment : ''}, ${order.city}, ${order.state} - ${order.postal_code}, ${order.country}`;
+      addressEl.textContent = fullAddress;
+    }
+
+    // Payment and order status
+    const paymentStatusEl = document.getElementById('paymentStatus');
+    const orderStatusEl = document.getElementById('orderStatus');
+    
+    if (paymentStatusEl) {
+      const status = order.payment_status || 'pending';
+      paymentStatusEl.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+      paymentStatusEl.className = `px-4 py-1 rounded-full text-sm font-semibold ${
+        status === 'paid' ? 'bg-green-500/20 text-green-400' :
+        status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+        'bg-red-500/20 text-red-400'
+      }`;
+    }
+
+    if (orderStatusEl) {
+      const status = order.order_status || 'pending';
+      orderStatusEl.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+      orderStatusEl.className = `px-4 py-1 rounded-full text-sm font-semibold ${
+        status === 'confirmed' || status === 'processing' ? 'bg-blue-500/20 text-blue-400' :
+        status === 'shipped' ? 'bg-purple-500/20 text-purple-400' :
+        status === 'delivered' ? 'bg-green-500/20 text-green-400' :
+        status === 'cancelled' ? 'bg-red-500/20 text-red-400' :
+        'bg-yellow-500/20 text-yellow-400'
+      }`;
+    }
+
+    // Order items
+    const itemsContainer = document.getElementById('orderItems');
+    if (itemsContainer && order.items && order.items.length > 0) {
+      itemsContainer.innerHTML = order.items.map((item: any) => `
+        <div class="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg">
+          <div class="flex-1">
+            <p class="text-white font-medium">${item.product_name}</p>
+            <p class="text-sm text-gray-400">Qty: ${item.quantity} × ₹${item.product_price}</p>
+          </div>
+          <p class="text-yellow-400 font-bold">₹${item.subtotal}</p>
+        </div>
+      `).join('');
+    }
+
+    // Total amount
+    const totalEl = document.getElementById('totalAmount');
+    if (totalEl) {
+      totalEl.textContent = `₹${order.total_amount}`;
+    }
+  }
+</script>
+
+<style>
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  main > div {
+    animation: slideInUp 0.6s ease-out;
+  }
+
+  @media print {
+    nav, footer, button {
+      display: none !important;
+    }
+    
+    main {
+      background: white !important;
+      color: black !important;
+    }
+  }
+</style>

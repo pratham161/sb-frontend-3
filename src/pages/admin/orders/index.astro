@@ -1,0 +1,596 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Orders - Symbiocroft Admin">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-white mb-2">Orders Management</h1>
+    <p class="text-gray-400">View and manage all customer orders</p>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="mb-6 flex items-center gap-2 overflow-x-auto pb-2">
+    <button class="px-4 py-2 bg-green-500/20 text-green-400 border border-green-500 rounded-lg font-medium whitespace-nowrap">
+      All Orders (156)
+    </button>
+    <button class="px-4 py-2 bg-gray-800/50 text-gray-300 border border-gray-600 rounded-lg hover:border-orange-500/50 hover:text-orange-400 transition-all whitespace-nowrap">
+      Pending (23)
+    </button>
+    <button class="px-4 py-2 bg-gray-800/50 text-gray-300 border border-gray-600 rounded-lg hover:border-blue-500/50 hover:text-blue-400 transition-all whitespace-nowrap">
+      Processing (45)
+    </button>
+    <button class="px-4 py-2 bg-gray-800/50 text-gray-300 border border-gray-600 rounded-lg hover:border-green-500/50 hover:text-green-400 transition-all whitespace-nowrap">
+      Completed (82)
+    </button>
+    <button class="px-4 py-2 bg-gray-800/50 text-gray-300 border border-gray-600 rounded-lg hover:border-red-500/50 hover:text-red-400 transition-all whitespace-nowrap">
+      Cancelled (6)
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-gray-800/50 backdrop-blur-sm border border-green-500/30 rounded-xl p-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-400 mb-2">Search</label>
+        <input
+          type="text"
+          placeholder="Order ID or customer name"
+          class="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none"
+        />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-400 mb-2">Date Range</label>
+        <select class="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none">
+          <option>All Time</option>
+          <option>Today</option>
+          <option>Last 7 Days</option>
+          <option>Last 30 Days</option>
+          <option>This Month</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-400 mb-2">Payment Status</label>
+        <select class="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none">
+          <option>All</option>
+          <option>Paid</option>
+          <option>Pending</option>
+          <option>Failed</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-400 mb-2">Sort By</label>
+        <select class="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none">
+          <option>Newest First</option>
+          <option>Oldest First</option>
+          <option>Amount: High to Low</option>
+          <option>Amount: Low to High</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Orders Table -->
+  <div class="bg-gray-800/50 backdrop-blur-sm border border-green-500/30 rounded-xl overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-gray-700 bg-gray-900/50">
+            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-400">Order ID</th>
+            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-400">Customer</th>
+            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-400">Amount</th>
+            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-400">Status</th>
+            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-400">Date</th>
+            <th class="text-right py-4 px-6 text-sm font-semibold text-gray-400">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="ordersTableBody">
+          <!-- Loading state -->
+          <tr>
+            <td colspan="6" class="py-8 text-center">
+              <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mx-auto mb-4"></div>
+              <p class="text-gray-400">Loading orders...</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div id="paginationContainer" class="mt-8 flex items-center justify-between hidden">
+    <p id="paginationInfo" class="text-sm text-gray-400"></p>
+    <div id="paginationButtons" class="flex gap-2"></div>
+  </div>
+</AdminLayout>
+
+<script>
+  import { orderService } from '../../../services/orderService';
+
+  let allOrders: any[] = [];
+  let currentPage = 1;
+  const ordersPerPage = 10;
+
+  async function loadOrders() {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        window.location.href = '/admin/login';
+        return;
+      }
+
+      const response = await orderService.getAllOrders();
+      
+      if (response.success) {
+        allOrders = response.data || [];
+        renderOrders();
+        updateFilterTabs();
+      } else {
+        throw new Error('Failed to load orders');
+      }
+    } catch (error) {
+      console.error('Error loading orders:', error);
+      const tbody = document.getElementById('ordersTableBody');
+      if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-red-400">Failed to load orders</td></tr>';
+      }
+    }
+  }
+
+  function updateFilterTabs() {
+    const tabs = document.querySelectorAll('.mb-6 button');
+    if (tabs.length === 0) return;
+
+    const statusCounts = {
+      all: allOrders.length,
+      pending: allOrders.filter(o => o.status === 'pending').length,
+      processing: allOrders.filter(o => o.status === 'processing').length,
+      shipped: allOrders.filter(o => o.status === 'shipped').length,
+      delivered: allOrders.filter(o => o.status === 'delivered').length,
+      cancelled: allOrders.filter(o => o.status === 'cancelled').length
+    };
+
+    tabs[0].textContent = `All Orders (${statusCounts.all})`;
+    tabs[1].textContent = `Pending (${statusCounts.pending})`;
+    tabs[2].textContent = `Processing (${statusCounts.processing})`;
+    tabs[3].textContent = `Shipped (${statusCounts.shipped})`;
+    tabs[4].textContent = `Delivered (${statusCounts.delivered})`;
+    if (tabs.length > 5) tabs[5].textContent = `Cancelled (${statusCounts.cancelled})`;
+  }
+
+  function getStatusColor(status: string): string {
+    const colors: Record<string, string> = {
+      'pending': 'bg-orange-500/20 text-orange-400',
+      'processing': 'bg-blue-500/20 text-blue-400',
+      'shipped': 'bg-purple-500/20 text-purple-400',
+      'delivered': 'bg-green-500/20 text-green-400',
+      'cancelled': 'bg-red-500/20 text-red-400'
+    };
+    return colors[status] || 'bg-gray-500/20 text-gray-400';
+  }
+
+  function renderOrders() {
+    const tbody = document.getElementById('ordersTableBody');
+    const paginationContainer = document.getElementById('paginationContainer');
+    
+    if (!tbody) return;
+
+    if (allOrders.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" class="py-8 text-center">
+            <p class="text-gray-400">No orders found</p>
+          </td>
+        </tr>
+      `;
+      paginationContainer?.classList.add('hidden');
+      return;
+    }
+
+    // Pagination
+    const totalPages = Math.ceil(allOrders.length / ordersPerPage);
+    const startIndex = (currentPage - 1) * ordersPerPage;
+    const endIndex = startIndex + ordersPerPage;
+    const paginatedOrders = allOrders.slice(startIndex, endIndex);
+
+    tbody.innerHTML = paginatedOrders.map(order => {
+      const statusColor = getStatusColor(order.status);
+      const date = new Date(order.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+      const time = new Date(order.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      
+      return `
+        <tr class="border-b border-gray-700/50 hover:bg-gray-700/20 transition-colors">
+          <td class="py-4 px-6">
+            <span class="text-white font-mono font-semibold">#${order.id}</span>
+          </td>
+          <td class="py-4 px-6">
+            <div>
+              <p class="text-white font-medium">${order.customer_name}</p>
+              <p class="text-sm text-gray-400">${order.customer_email}</p>
+              <p class="text-sm text-gray-400">${order.customer_phone}</p>
+            </div>
+          </td>
+          <td class="py-4 px-6">
+            <span class="text-yellow-400 font-bold text-lg">₹${parseFloat(order.total_amount).toFixed(2)}</span>
+          </td>
+          <td class="py-4 px-6">
+            <select 
+              onchange="updateOrderStatus(${order.id}, this.value)"
+              class="px-3 py-1 ${statusColor} border border-${order.status}-500/30 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-${order.status}-500/20"
+            >
+              <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+              <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
+              <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+              <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+              <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+            </select>
+          </td>
+          <td class="py-4 px-6">
+            <div class="text-sm text-gray-400">
+              <p>${date}</p>
+              <p>${time}</p>
+            </div>
+          </td>
+          <td class="py-4 px-6">
+            <div class="flex items-center justify-end gap-2">
+              <button
+                onclick="viewOrderDetails(${order.id})"
+                class="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-all"
+                title="View Details"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    // Update pagination
+    if (allOrders.length > ordersPerPage) {
+      paginationContainer?.classList.remove('hidden');
+      updatePagination(allOrders.length, totalPages);
+    } else {
+      paginationContainer?.classList.add('hidden');
+    }
+  }
+
+  function updatePagination(totalItems: number, totalPages: number) {
+    const info = document.getElementById('paginationInfo');
+    const buttons = document.getElementById('paginationButtons');
+    
+    if (!info || !buttons) return;
+
+    const startIndex = (currentPage - 1) * ordersPerPage + 1;
+    const endIndex = Math.min(currentPage * ordersPerPage, totalItems);
+    
+    info.textContent = `Showing ${startIndex}-${endIndex} of ${totalItems} orders`;
+    
+    buttons.innerHTML = `
+      <button 
+        onclick="changePage(${currentPage - 1})"
+        ${currentPage === 1 ? 'disabled' : ''}
+        class="px-4 py-2 bg-gray-800/50 border border-gray-600 text-gray-300 rounded-lg hover:border-green-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Previous
+      </button>
+      <button class="px-4 py-2 bg-green-500/20 border border-green-500 text-green-400 rounded-lg">
+        ${currentPage}
+      </button>
+      <button 
+        onclick="changePage(${currentPage + 1})"
+        ${currentPage === totalPages ? 'disabled' : ''}
+        class="px-4 py-2 bg-gray-800/50 border border-gray-600 text-gray-300 rounded-lg hover:border-green-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Next
+      </button>
+    `;
+  }
+
+  (window as any).changePage = function(page: number) {
+    currentPage = page;
+    renderOrders();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  (window as any).updateOrderStatus = async function(orderId: number, newStatus: string) {
+    try {
+      const response = await orderService.updateOrderStatus(orderId, newStatus);
+
+      if (response.success) {
+        const order = allOrders.find(o => o.id === orderId);
+        if (order) {
+          order.status = newStatus;
+        }
+        renderOrders();
+        updateFilterTabs();
+        alert('Order status updated successfully!');
+      } else {
+        throw new Error(response.error || 'Failed to update order status');
+      }
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      alert('Failed to update order status. Please try again.');
+      loadOrders(); // Reload to reset the dropdown
+    }
+  };
+
+  (window as any).viewOrderDetails = async function(orderId: number) {
+    try {
+      const response = await orderService.getOrderById(orderId);
+      
+      if (response.success && response.data) {
+        const order = response.data;
+        alert(`Order Details:\n\nOrder ID: #${order.id}\nCustomer: ${order.customer_name}\nEmail: ${order.customer_email}\nPhone: ${order.customer_phone}\nAddress: ${order.shipping_address}\nTotal: ₹${order.total_amount}\nStatus: ${order.status}`);
+      } else {
+        alert('Failed to load order details');
+      }
+    } catch (error) {
+      console.error('Error loading order details:', error);
+      alert('Failed to load order details');
+    }
+  };
+
+  // Load orders on page load
+  loadOrders();
+</script>
+            </td>
+            <td class="py-4 px-6">
+              <div class="text-sm text-gray-300">
+                <p>Spirulina Powder × 2</p>
+                <p>Khakhra Plain × 1</p>
+              </div>
+            </td>
+            <td class="py-4 px-6">
+              <span class="text-yellow-400 font-bold text-lg">₹1,299</span>
+            </td>
+            <td class="py-4 px-6">
+              <span class="text-xs px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded-full">Pending</span>
+            </td>
+            <td class="py-4 px-6">
+              <select class="px-3 py-1 bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20">
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </td>
+            <td class="py-4 px-6">
+              <div class="text-sm text-gray-400">
+                <p>Jan 7, 2026</p>
+                <p>10:30 AM</p>
+              </div>
+            </td>
+            <td class="py-4 px-6">
+              <div class="flex items-center justify-end gap-2">
+                <button
+                  onclick="event.stopPropagation(); viewOrder('ORD-1234')"
+                  class="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-all"
+                  title="View Details"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
+                </button>
+                <button
+                  onclick="event.stopPropagation(); printInvoice('ORD-1234')"
+                  class="px-3 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg transition-all"
+                  title="Print Invoice"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Expandable Details Row -->
+          <tr id="order1-details" class="hidden bg-gray-900/30">
+            <td colspan="8" class="p-6">
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Shipping Address -->
+                <div class="bg-gray-800/30 rounded-lg p-4">
+                  <h4 class="text-white font-semibold mb-3">Shipping Address</h4>
+                  <p class="text-gray-300 text-sm">
+                    Rajesh Kumar<br/>
+                    123 Main Street, Apartment 4B<br/>
+                    Mumbai, Maharashtra 400001<br/>
+                    India
+                  </p>
+                </div>
+
+                <!-- Order Notes -->
+                <div class="bg-gray-800/30 rounded-lg p-4">
+                  <h4 class="text-white font-semibold mb-3">Order Notes</h4>
+                  <textarea
+                    class="w-full px-3 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white text-sm focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none resize-none"
+                    rows="3"
+                    placeholder="Add internal notes..."
+                  ></textarea>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Order 2 - Processing -->
+          <tr class="border-b border-gray-700/50 hover:bg-gray-700/20 transition-colors">
+            <td class="py-4 px-6">
+              <span class="text-white font-mono font-semibold">#ORD-1233</span>
+            </td>
+            <td class="py-4 px-6">
+              <div>
+                <p class="text-white font-medium">Priya Sharma</p>
+                <p class="text-sm text-gray-400">priya@email.com</p>
+                <p class="text-sm text-gray-400">+91 98765 43211</p>
+              </div>
+            </td>
+            <td class="py-4 px-6">
+              <div class="text-sm text-gray-300">
+                <p>Jelly Orange × 3</p>
+                <p>Cookies Plain × 2</p>
+              </div>
+            </td>
+            <td class="py-4 px-6">
+              <span class="text-yellow-400 font-bold text-lg">₹899</span>
+            </td>
+            <td class="py-4 px-6">
+              <span class="text-xs px-2 py-1 bg-green-500/20 text-green-400 rounded-full">Paid</span>
+            </td>
+            <td class="py-4 px-6">
+              <select class="px-3 py-1 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                <option value="pending">Pending</option>
+                <option value="processing" selected>Processing</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </td>
+            <td class="py-4 px-6">
+              <div class="text-sm text-gray-400">
+                <p>Jan 6, 2026</p>
+                <p>02:15 PM</p>
+              </div>
+            </td>
+            <td class="py-4 px-6">
+              <div class="flex items-center justify-end gap-2">
+                <button
+                  onclick="viewOrder('ORD-1233')"
+                  class="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-all"
+                  title="View Details"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
+                </button>
+                <button
+                  onclick="printInvoice('ORD-1233')"
+                  class="px-3 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg transition-all"
+                  title="Print Invoice"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Order 3 - Completed -->
+          <tr class="border-b border-gray-700/50 hover:bg-gray-700/20 transition-colors">
+            <td class="py-4 px-6">
+              <span class="text-white font-mono font-semibold">#ORD-1232</span>
+            </td>
+            <td class="py-4 px-6">
+              <div>
+                <p class="text-white font-medium">Amit Patel</p>
+                <p class="text-sm text-gray-400">amit@email.com</p>
+                <p class="text-sm text-gray-400">+91 98765 43212</p>
+              </div>
+            </td>
+            <td class="py-4 px-6">
+              <div class="text-sm text-gray-300">
+                <p>Spirulina Powder × 3</p>
+                <p>Khakhra Masala × 2</p>
+                <p>Cookies Chocolate × 1</p>
+              </div>
+            </td>
+            <td class="py-4 px-6">
+              <span class="text-yellow-400 font-bold text-lg">₹2,150</span>
+            </td>
+            <td class="py-4 px-6">
+              <span class="text-xs px-2 py-1 bg-green-500/20 text-green-400 rounded-full">Paid</span>
+            </td>
+            <td class="py-4 px-6">
+              <select class="px-3 py-1 bg-green-500/20 text-green-400 border border-green-500/30 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20">
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="completed" selected>Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </td>
+            <td class="py-4 px-6">
+              <div class="text-sm text-gray-400">
+                <p>Jan 5, 2026</p>
+                <p>11:45 AM</p>
+              </div>
+            </td>
+            <td class="py-4 px-6">
+              <div class="flex items-center justify-end gap-2">
+                <button
+                  onclick="viewOrder('ORD-1232')"
+                  class="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-all"
+                  title="View Details"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
+                </button>
+                <button
+                  onclick="printInvoice('ORD-1232')"
+                  class="px-3 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg transition-all"
+                  title="Print Invoice"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="mt-8 flex items-center justify-between">
+    <p class="text-sm text-gray-400">Showing 1-3 of 156 orders</p>
+    <div class="flex gap-2">
+      <button class="px-4 py-2 bg-gray-800/50 border border-gray-600 text-gray-400 rounded-lg hover:border-green-500/50 transition-all">
+        Previous
+      </button>
+      <button class="px-4 py-2 bg-green-500/20 border border-green-500 text-green-400 rounded-lg">
+        1
+      </button>
+      <button class="px-4 py-2 bg-gray-800/50 border border-gray-600 text-gray-300 rounded-lg hover:border-green-500/50 transition-all">
+        2
+      </button>
+      <button class="px-4 py-2 bg-gray-800/50 border border-gray-600 text-gray-300 rounded-lg hover:border-green-500/50 transition-all">
+        3
+      </button>
+      <button class="px-4 py-2 bg-gray-800/50 border border-gray-600 text-gray-300 rounded-lg hover:border-green-500/50 transition-all">
+        Next
+      </button>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  function toggleOrderDetails(orderId: string) {
+    const detailsRow = document.getElementById(`${orderId}-details`);
+    if (detailsRow) {
+      detailsRow.classList.toggle('hidden');
+    }
+  }
+
+  function viewOrder(orderId: string) {
+    alert(`Viewing details for ${orderId}`);
+    // In production, open a modal or navigate to order detail page
+  }
+
+  function printInvoice(orderId: string) {
+    alert(`Printing invoice for ${orderId}`);
+    // In production, generate and print PDF invoice
+  }
+
+  // Make functions globally available
+  (window as any).toggleOrderDetails = toggleOrderDetails;
+  (window as any).viewOrder = viewOrder;
+  (window as any).printInvoice = printInvoice;
+</script>

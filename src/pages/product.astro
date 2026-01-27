@@ -1,0 +1,369 @@
+---
+import Cart from "../components/Cart.astro";
+import Footer from "../components/Footer.astro";
+import NavBar from "../components/NavBar.astro";
+import Layout from "../layouts/Layout.astro";
+
+---
+
+<Layout>
+  <NavBar />
+
+  <main class="bg-gradient-to-b from-gray-900 to-black text-white py-12 px-6">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <!-- Left: Images -->
+      <div class="lg:col-span-5 bg-gray-800/30 rounded-lg p-6">
+        <div class="w-full bg-black/20 rounded-lg p-4 flex items-center justify-center">
+          <img id="productImage" src="/productimages/spirulinapowder.png" alt="Product image" class="w-full h-96 object-contain rounded-lg" />
+        </div>
+        <div id="thumbnailRow" class="mt-4 flex gap-3 overflow-x-auto">
+          <!-- thumbnails (can be wired to change main image) -->
+          <img class="w-20 h-20 object-cover rounded border border-green-500/30" src="/productimages/spirulinapowder.png" onclick="document.getElementById('productImage').src=this.src" />
+          <img class="w-20 h-20 object-cover rounded border border-green-500/30" src="/productimages/khakhra.png" onclick="document.getElementById('productImage').src=this.src" />
+          <img class="w-20 h-20 object-cover rounded border border-green-500/30" src="/productimages/jelly.png" onclick="document.getElementById('productImage').src=this.src" />
+        </div>
+      </div>
+
+      <!-- Right: Info -->
+      <div class="lg:col-span-7">
+        <div class="bg-gray-800/30 backdrop-blur-sm border border-green-500/30 rounded-lg p-6">
+          <div class="mb-4">
+            <p id="productCategory" class="text-sm text-green-400 font-semibold">Category</p>
+            <h1 id="productTitle" class="text-3xl font-extrabold text-yellow-400 mt-1">Spirulina Powder</h1>
+            <div class="mt-2 flex items-center gap-4">
+              <span id="productPrice" class="text-3xl font-bold text-yellow-400">₹499</span>
+              <span class="text-sm text-gray-400">Inclusive of all taxes</span>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <h3 class="text-lg font-semibold text-white mb-2">Product details</h3>
+            <p id="productDesc" class="text-sm text-gray-200">Pure. Potent. Purposeful. Our Spirulina is cultivated in hygienic, controlled conditions using solar drying and raceway pond technology ensuring quality.</p>
+          </div>
+
+          <div class="mb-4">
+            <h3 class="text-lg font-semibold text-white mb-2">Benefits</h3>
+            <ul id="productBenefits" class="list-disc list-inside text-sm text-gray-200 space-y-1">
+              <li>Rich in protein</li>
+              <li>High in iron</li>
+              <li>Natural antioxidant</li>
+            </ul>
+          </div>
+
+          <!-- Flavors/Variants Section -->
+          <div id="variantsSection" class="mb-6 hidden">
+            <h3 class="text-lg font-semibold text-white mb-3">Available Flavors</h3>
+            <div id="variantsContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <!-- Variants will be dynamically added here -->
+            </div>
+          </div>
+
+          <div class="mb-4 flex items-center gap-4">
+            <label class="text-sm text-gray-300">Quantity</label>
+            <div class="flex items-center gap-2 bg-gray-700/50 rounded px-2 py-1">
+              <button id="qtyMinus" class="text-white px-2">−</button>
+              <span id="qtyVal" class="w-8 text-center font-semibold">1</span>
+              <button id="qtyPlus" class="text-white px-2">+</button>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-4 mt-6">
+            <button id="addCartBtn" class="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-black font-bold rounded transition-all duration-200 active:scale-95">Add to Cart</button>
+            <button id="buyNowBtn" class="px-6 py-3 border border-green-500/30 text-green-400 hover:bg-green-500/10 font-semibold rounded transition-all duration-200">Buy Now</button>
+          </div>
+
+          <div class="mt-6 border-t border-green-500/20 pt-4">
+            <p class="text-sm text-gray-400">Share:</p>
+            <div class="flex gap-2 mt-2">
+              <button class="px-3 py-2 bg-gray-800/50 rounded border border-green-500/20">Facebook</button>
+              <button class="px-3 py-2 bg-gray-800/50 rounded border border-green-500/20">Twitter</button>
+              <button class="px-3 py-2 bg-gray-800/50 rounded border border-green-500/20">WhatsApp</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional details / description block -->
+        <div class="mt-6 bg-gray-800/20 border border-green-500/20 rounded-lg p-6">
+          <h3 class="text-xl font-bold text-red-500 mb-3">More about this product</h3>
+          <p id="productLongDesc" class="text-sm text-gray-200">Detailed description and usage instructions will appear here. You can add ingredients, instructions, warnings, storage info and more.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+  <Cart />
+</Layout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Products database with multiple variants per category
+    const allProducts = {
+      'Powder': [
+        {
+          id: 'spirulina-powder',
+          name: 'Spirulina Powder',
+          category: 'Powder',
+          title: 'Pure Spirulina Powder',
+          price: 499,
+          desc: 'Pure. Potent. Purposeful. Our Spirulina is cultivated in hygienic, controlled conditions using solar drying and raceway pond technology ensuring quality.',
+          preview: '/productimages/spirulinapowder.png',
+          benifits: ['Rich in protein', 'High in iron', 'Natural antioxidant']
+        }
+      ],
+      'Khakhra': [
+        {
+          id: 'khakhra-plain',
+          name: 'Plain Spirulina Khakhra',
+          category: 'Khakhra',
+          title: 'Plain Spirulina Khakhra',
+          price: 120,
+          desc: 'Crunch with a Purpose. Our classic plain khakhra — gluten-free, protein-rich, and infused with premium Spirulina for guilt-free snacking.',
+          preview: '/productimages/khakhra.png',
+          benifits: ['High in protein', 'Gluten-free', 'Low calorie', 'Crispy texture']
+        },
+        {
+          id: 'khakhra-masala',
+          name: 'Masala Spirulina Khakhra',
+          category: 'Khakhra',
+          title: 'Masala Spirulina Khakhra',
+          price: 130,
+          desc: 'Spicy and nutritious. Our masala khakhra combines traditional Indian spices with the goodness of Spirulina for a flavorful, healthy snack.',
+          preview: '/productimages/khakhra.png',
+          benifits: ['Spicy flavor', 'High in protein', 'Gluten-free', 'Perfect for tea time']
+        },
+        {
+          id: 'khakhra-methi',
+          name: 'Methi Spirulina Khakhra',
+          category: 'Khakhra',
+          title: 'Methi Spirulina Khakhra',
+          price: 125,
+          desc: 'Traditional goodness with a twist. Methi (fenugreek) combined with Spirulina creates a unique, nutritious khakhra perfect for any time.',
+          preview: '/productimages/khakhra.png',
+          benifits: ['Methi flavor', 'Digestive support', 'High protein', 'Traditional taste']
+        }
+      ],
+      'Jelly': [
+        {
+          id: 'jelly-orange',
+          name: 'Orange Spirulina Nutri Jelly',
+          category: 'Jelly',
+          title: 'Orange Spirulina Nutri Jelly',
+          price: 80,
+          desc: 'Fun Meets Function. Tangy orange flavor packed with Spirulina nutrients — perfect for kids and adults needing a quick immunity boost.',
+          preview: '/productimages/jelly.png',
+          benifits: ['Vitamin C boost', 'Easy to consume', 'Kid-friendly', 'Immunity support']
+        },
+        {
+          id: 'jelly-mango',
+          name: 'Mango Spirulina Nutri Jelly',
+          category: 'Jelly',
+          title: 'Mango Spirulina Nutri Jelly',
+          price: 85,
+          desc: 'Tropical delight with nutrition. Sweet mango flavor with all the benefits of Spirulina in a delicious, easy-to-eat jelly format.',
+          preview: '/productimages/jelly.png',
+          benifits: ['Tropical taste', 'Rich in antioxidants', 'Kid-friendly', 'Energy boost']
+        },
+        {
+          id: 'jelly-mixed-fruit',
+          name: 'Mixed Fruit Spirulina Nutri Jelly',
+          category: 'Jelly',
+          title: 'Mixed Fruit Spirulina Nutri Jelly',
+          price: 90,
+          desc: 'Variety in every bite. A medley of fruit flavors combined with Spirulina for maximum taste and nutrition.',
+          preview: '/productimages/jelly.png',
+          benifits: ['Multiple flavors', 'Rich vitamins', 'Convenient', 'All-age friendly']
+        }
+      ],
+      'Cookies': [
+        {
+          id: 'cookies-plain',
+          name: 'Plain Spirulina Millet Cookies',
+          category: 'Cookies',
+          title: 'Plain Spirulina Millet Cookies',
+          price: 150,
+          desc: 'Smart Snacking, Naturally. Classic flavor made with millets, Spirulina and jaggery — gluten-free and protein-packed.',
+          preview: '/productimages/cookies.png',
+          benifits: ['High protein', 'Gluten-free', 'Natural sweetener', 'Wholesome snack']
+        },
+        {
+          id: 'cookies-chocolate',
+          name: 'Chocolate Spirulina Millet Cookies',
+          category: 'Cookies',
+          title: 'Chocolate Spirulina Millet Cookies',
+          price: 170,
+          desc: 'Guilt-free indulgence. Rich chocolate flavor combined with millet and Spirulina for a healthy, satisfying treat.',
+          preview: '/productimages/cookies.png',
+          benifits: ['Chocolate delight', 'Antioxidant-rich', 'Protein boost', 'Healthy treat']
+        },
+        {
+          id: 'cookies-coconut',
+          name: 'Coconut Spirulina Millet Cookies',
+          category: 'Cookies',
+          title: 'Coconut Spirulina Millet Cookies',
+          price: 160,
+          desc: 'Tropical goodness in every bite. Coconut-flavored cookies with millets and Spirulina for a unique, nutritious snack.',
+          preview: '/productimages/cookies.png',
+          benifits: ['Coconut flavor', 'Fiber-rich', 'Energy boost', 'Crunchy texture']
+        },
+        {
+          id: 'cookies-almond',
+          name: 'Almond Spirulina Millet Cookies',
+          category: 'Cookies',
+          title: 'Almond Spirulina Millet Cookies',
+          price: 180,
+          desc: 'Premium nutty delight. Almonds, millets and Spirulina come together for a protein-rich, premium cookie experience.',
+          preview: '/productimages/cookies.png',
+          benifits: ['Almond crunch', 'High protein', 'Brain health', 'Premium taste']
+        }
+      ]
+    };
+
+    // Get current product from URL or default to Spirulina Powder
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id') || 'spirulina-powder';
+    
+    let currentProduct = null;
+    let categoryProducts = [];
+    
+    // Find the current product
+    for (const [category, products] of Object.entries(allProducts)) {
+      const found = products.find(p => p.id === productId);
+      if (found) {
+        currentProduct = found;
+        categoryProducts = products;
+        break;
+      }
+    }
+
+    // Fallback to default product
+    if (!currentProduct) {
+      currentProduct = allProducts['Powder'][0];
+      categoryProducts = allProducts['Powder'];
+    }
+
+    function renderProduct(p) {
+      const safe = p || currentProduct;
+      const titleEl = document.getElementById('productTitle');
+      const priceEl = document.getElementById('productPrice');
+      const descEl = document.getElementById('productDesc');
+      const longDescEl = document.getElementById('productLongDesc');
+      const categoryEl = document.getElementById('productCategory');
+      const imgEl = document.getElementById('productImage') as HTMLImageElement;
+
+      if (titleEl) titleEl.textContent = safe.title || safe.name;
+      if (priceEl) priceEl.textContent = '₹' + (safe.price || 0);
+      if (descEl) descEl.textContent = safe.desc || '';
+      if (longDescEl) longDescEl.textContent = safe.desc || '';
+      if (categoryEl) categoryEl.textContent = safe.category || '';
+      if (imgEl) (imgEl as HTMLImageElement).src = safe.preview || '/productimages/spirulinapowder.png';
+
+      const benefitsEl = document.getElementById('productBenefits');
+      if (benefitsEl) {
+        benefitsEl.innerHTML = '';
+        (safe.benifits || safe.benefits || []).forEach(b => {
+          const li = document.createElement('li');
+          li.textContent = b;
+          benefitsEl.appendChild(li);
+        });
+      }
+    }
+
+    function renderVariants() {
+      const variantsSection = document.getElementById('variantsSection');
+      const variantsContainer = document.getElementById('variantsContainer');
+      
+      if (!variantsSection || !variantsContainer) return;
+
+      // Show variants section only if there are multiple products in the category
+      if (categoryProducts.length > 1) {
+        variantsSection.classList.remove('hidden');
+        variantsContainer.innerHTML = '';
+
+        categoryProducts.forEach(variant => {
+          const isActive = variant.id === currentProduct.id;
+          const variantCard = document.createElement('div');
+          variantCard.className = `
+            relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all duration-200
+            ${isActive 
+              ? 'border-green-500 bg-green-500/20 ring-2 ring-green-500/50' 
+              : 'border-gray-600 hover:border-green-400 bg-gray-800/30'
+            }
+          `;
+          
+          variantCard.innerHTML = `
+            <div class="aspect-square bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center p-2">
+              <img src="${variant.preview}" alt="${variant.name}" class="w-full h-full object-contain" />
+            </div>
+            <div class="p-2">
+              <p class="text-xs font-semibold text-white truncate">${variant.name}</p>
+              <p class="text-sm font-bold text-yellow-400">₹${variant.price}</p>
+            </div>
+            ${isActive ? '<div class="absolute top-2 right-2 bg-green-500 text-black text-xs font-bold px-2 py-1 rounded">Current</div>' : ''}
+          `;
+
+          if (!isActive) {
+            variantCard.addEventListener('click', () => {
+              window.location.href = `/product?id=${variant.id}`;
+            });
+          }
+
+          variantsContainer.appendChild(variantCard);
+        });
+      } else {
+        variantsSection.classList.add('hidden');
+      }
+    }
+
+    // Render the current product and variants
+    renderProduct(currentProduct);
+    renderVariants();
+
+    // Quantity controls
+    let qty = 1;
+    const qtyVal = document.getElementById('qtyVal');
+    const plusBtn = document.getElementById('qtyPlus');
+    const minusBtn = document.getElementById('qtyMinus');
+    if (plusBtn) plusBtn.addEventListener('click', () => { qty++; if (qtyVal) qtyVal.textContent = String(qty); });
+    if (minusBtn) minusBtn.addEventListener('click', () => { if (qty>1) qty--; if (qtyVal) qtyVal.textContent = String(qty); });
+
+    // Add to cart
+    const addBtn = document.getElementById('addCartBtn');
+    if (addBtn) {
+      addBtn.addEventListener('click', () => {
+        const title = currentProduct.title;
+        const price = currentProduct.price;
+        const image = currentProduct.preview;
+
+        if (window.addToCart) {
+          for (let i=0;i<qty;i++) window.addToCart(title, price, image);
+        } else {
+          alert('Cart not available');
+        }
+      });
+    }
+
+    // Buy now -> add and open cart
+    const buyBtn = document.getElementById('buyNowBtn');
+    if (buyBtn) {
+      buyBtn.addEventListener('click', () => {
+        const title = currentProduct.title;
+        const price = currentProduct.price;
+        const image = currentProduct.preview;
+
+        if (window.addToCart) {
+          for (let i=0;i<qty;i++) window.addToCart(title, price, image);
+          const cartBtn = document.getElementById('cartBtn');
+          if (cartBtn) cartBtn.click();
+        } else {
+          alert('Cart not available');
+        }
+      });
+    }
+  });
+</script>
+
+<style>
+  /* ensure the page follows the shared dark theme */
+  #productImage { background: linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.2)); }
+</style>

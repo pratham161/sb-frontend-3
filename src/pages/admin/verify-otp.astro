@@ -1,0 +1,333 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Verify OTP - Symbiocroft Admin">
+  <div class="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center px-4">
+    <div class="max-w-md w-full">
+      <!-- Logo/Brand -->
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-green-500/20 border-2 border-green-500 rounded-full mb-4">
+          <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+        </div>
+        <h1 class="text-3xl font-bold text-white mb-2">Two-Factor Authentication</h1>
+        <p class="text-gray-400">Enter the 4-digit code sent to your device</p>
+      </div>
+
+      <!-- OTP Card -->
+      <div class="bg-gray-800/50 backdrop-blur-sm border border-green-500/30 rounded-2xl p-8 shadow-2xl">
+        <!-- Email Display -->
+        <div class="mb-6 p-4 bg-gray-900/50 border border-gray-700 rounded-lg">
+          <p class="text-sm text-gray-400 mb-1">Verification code sent to:</p>
+          <p id="emailDisplay" class="text-white font-medium">loading...</p>
+        </div>
+
+        <form id="otpForm" class="space-y-6">
+          <!-- OTP Input Fields -->
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-4 text-center">
+              Enter 6-Digit Code
+            </label>
+            <div class="flex justify-center gap-3">
+              <input
+                type="text"
+                maxlength="1"
+                class="otp-input w-14 h-14 text-center text-2xl font-bold bg-gray-900/50 border-2 border-gray-600 rounded-lg text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none transition-all"
+                id="otp1"
+                data-index="0"
+                autocomplete="off"
+              />
+              <input
+                type="text"
+                maxlength="1"
+                class="otp-input w-14 h-14 text-center text-2xl font-bold bg-gray-900/50 border-2 border-gray-600 rounded-lg text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none transition-all"
+                id="otp2"
+                data-index="1"
+                autocomplete="off"
+              />
+              <input
+                type="text"
+                maxlength="1"
+                class="otp-input w-14 h-14 text-center text-2xl font-bold bg-gray-900/50 border-2 border-gray-600 rounded-lg text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none transition-all"
+                id="otp3"
+                data-index="2"
+                autocomplete="off"
+              />
+              <input
+                type="text"
+                maxlength="1"
+                class="otp-input w-14 h-14 text-center text-2xl font-bold bg-gray-900/50 border-2 border-gray-600 rounded-lg text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none transition-all"
+                id="otp4"
+                data-index="3"
+                autocomplete="off"
+              />
+              <input
+                type="text"
+                maxlength="1"
+                class="otp-input w-14 h-14 text-center text-2xl font-bold bg-gray-900/50 border-2 border-gray-600 rounded-lg text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none transition-all"
+                id="otp5"
+                data-index="4"
+                autocomplete="off"
+              />
+              <input
+                type="text"
+                maxlength="1"
+                class="otp-input w-14 h-14 text-center text-2xl font-bold bg-gray-900/50 border-2 border-gray-600 rounded-lg text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none transition-all"
+                id="otp6"
+                data-index="5"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+
+          <!-- Error Message -->
+          <div id="errorMessage" class="hidden p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+            <p class="text-red-400 text-sm text-center">Invalid code. Please try again.</p>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            id="verifyBtn"
+            class="w-full py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-lg transition-all duration-200 transform active:scale-95 shadow-lg hover:shadow-green-500/20"
+          >
+            Verify & Continue
+          </button>
+
+          <!-- Resend Code -->
+          <div class="text-center">
+            <p class="text-sm text-gray-400 mb-2">
+              Didn't receive the code?
+            </p>
+            <button
+              type="button"
+              id="resendBtn"
+              class="text-green-400 hover:text-green-300 text-sm font-medium transition-colors"
+            >
+              Resend Code
+            </button>
+            <span id="resendTimer" class="text-gray-500 text-sm ml-2 hidden"></span>
+          </div>
+        </form>
+
+        <!-- Back to Login -->
+        <div class="mt-6 pt-6 border-t border-gray-700">
+          <a
+            href="/admin/login"
+            class="flex items-center justify-center gap-2 text-gray-400 hover:text-white transition-colors"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            <span class="text-sm">Back to Login</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Security Notice -->
+      <div class="mt-6 text-center">
+        <p class="text-xs text-gray-500">
+          <svg class="inline-block w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+          </svg>
+          This code will expire in 5 minutes
+        </p>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // Display email from session storage
+  const emailDisplay = document.getElementById('emailDisplay');
+  const pendingEmail = sessionStorage.getItem('pendingAuthEmail');  const pendingUserId = sessionStorage.getItem('pendingAuthUserId');  
+  if (emailDisplay) {
+    if (pendingEmail) {
+      emailDisplay.textContent = pendingEmail;
+    } else {
+      emailDisplay.textContent = 'admin@symbiocroft.com';
+    }
+  }
+
+  // OTP Input handling
+  const otpInputs = document.querySelectorAll('.otp-input') as NodeListOf<HTMLInputElement>;
+  const errorMessage = document.getElementById('errorMessage');
+  const otpForm = document.getElementById('otpForm');
+  const verifyBtn = document.getElementById('verifyBtn') as HTMLButtonElement;
+
+  otpInputs.forEach((input, index) => {
+    // Handle input
+    input.addEventListener('input', (e) => {
+      const target = e.target as HTMLInputElement;
+      const value = target.value;
+
+      // Only allow numbers
+      if (!/^\d*$/.test(value)) {
+        target.value = '';
+        return;
+      }
+
+      // Move to next input
+      if (value && index < otpInputs.length - 1) {
+        otpInputs[index + 1].focus();
+      }
+
+      // Hide error on input
+      if (errorMessage) {
+        errorMessage.classList.add('hidden');
+      }
+    });
+
+    // Handle backspace
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !input.value && index > 0) {
+        otpInputs[index - 1].focus();
+      }
+    });
+
+    // Handle paste
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const pasteData = e.clipboardData?.getData('text');
+      if (pasteData && /^\d{6}$/.test(pasteData)) {
+        pasteData.split('').forEach((char, i) => {
+          if (otpInputs[i]) {
+            otpInputs[i].value = char;
+          }
+        });
+        otpInputs[5].focus();
+      }
+    });
+  });
+
+  // Focus first input on load
+  if (otpInputs[0]) {
+    otpInputs[0].focus();
+  }
+
+  // Handle form submission
+  if (otpForm) {
+    otpForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Get OTP value
+      const otp = Array.from(otpInputs).map(input => input.value).join('');
+      
+      if (otp.length !== 6) {
+        if (errorMessage) {
+          errorMessage.classList.remove('hidden');
+          errorMessage.querySelector('p')!.textContent = 'Please enter all 6 digits.';
+        }
+        return;
+      }
+
+      verifyBtn.disabled = true;
+      verifyBtn.textContent = 'Verifying...';
+
+      try {
+        const { authService } = await import('../../services/authService');
+        const response = await authService.verifyOTP({
+          userId: parseInt(pendingUserId || '0'),
+          otp
+        });
+
+        if (response.token) {
+          // Success - redirect to admin dashboard
+          sessionStorage.setItem('isAuthenticated', 'true');
+          sessionStorage.removeItem('pendingAuthEmail');
+          sessionStorage.removeItem('pendingAuthUserId');
+          window.location.href = '/admin';
+        } else {
+          // Error
+          if (errorMessage) {
+            errorMessage.classList.remove('hidden');
+            errorMessage.querySelector('p')!.textContent = response.message || 'Invalid code. Please try again.';
+          }
+          verifyBtn.disabled = false;
+          verifyBtn.textContent = 'Verify & Continue';
+          
+          // Clear inputs
+          otpInputs.forEach(input => input.value = '');
+          otpInputs[0].focus();
+        }
+      } catch (error) {
+        console.error('Verification error:', error);
+        if (errorMessage) {
+          errorMessage.classList.remove('hidden');
+          errorMessage.querySelector('p')!.textContent = error instanceof Error ? error.message : 'Verification failed. Please try again.';
+        }
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = 'Verify & Continue';
+        
+        // Clear inputs
+        otpInputs.forEach(input => input.value = '');
+        otpInputs[0].focus();
+      }
+    });
+  }
+
+  // Resend code functionality
+  const resendBtn = document.getElementById('resendBtn') as HTMLButtonElement | null;
+  const resendTimer = document.getElementById('resendTimer');
+  let resendCountdown = 30;
+  let resendInterval: number;
+
+  if (resendBtn) {
+    resendBtn.addEventListener('click', async () => {
+      resendBtn.disabled = true;
+      resendBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      
+      try {
+        const { authService } = await import('../../services/authService');
+        const response = await authService.resendOTP(parseInt(pendingUserId || '0'));
+        
+        if (response.userId) {
+          if (resendTimer) {
+            resendTimer.classList.remove('hidden');
+            resendTimer.textContent = `(${resendCountdown}s)`;
+          }
+
+          resendInterval = window.setInterval(() => {
+            resendCountdown--;
+            if (resendTimer) {
+              resendTimer.textContent = `(${resendCountdown}s)`;
+            }
+
+            if (resendCountdown <= 0) {
+              clearInterval(resendInterval);
+              resendBtn.disabled = false;
+              resendBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+              if (resendTimer) {
+                resendTimer.classList.add('hidden');
+              }
+              resendCountdown = 30;
+            }
+          }, 1000);
+        } else {
+          alert(response.message || 'Failed to resend code');
+          resendBtn.disabled = false;
+          resendBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+      } catch (error) {
+        console.error('Resend error:', error);
+        alert('Failed to resend code. Please try again.');
+        resendBtn.disabled = false;
+        resendBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+    });
+  }
+</script>
+
+<style>
+  .otp-input::-webkit-outer-spin-button,
+  .otp-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  
+  .otp-input[type=number] {
+    -moz-appearance: textfield;
+  }
+</style>
