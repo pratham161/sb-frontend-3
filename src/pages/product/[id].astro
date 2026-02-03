@@ -4,34 +4,47 @@ import Footer from '../../components/Footer.astro';
 import Layout from '../../layouts/Layout.astro';
 import Cart from '../../components/Cart.astro';
 import { productService } from '../../services/productService';
+import type { Product } from '../../services/productService';
 
-export const prerender = true;
+export const prerender = false;
 
-export async function getStaticPaths() {
-  try {
-    const response = await productService.getAllProducts();
-    if (response.success && response.data && Array.isArray(response.data)) {
-      console.log('Products loaded for static paths:');
-      return response.data.map((product) => {
-        console.log(`Product ${product.id}: ${product.name}, image: ${product.image_path}`);
-        return {
-          params: { id: product.id.toString() },
-          props: { product }
-        };
-      });
+const productId = Astro.params.id;
+const UPLOADS_URL = import.meta.env.PUBLIC_UPLOADS_URL || 'http://localhost:5000/uploads';
+
+let product: Product | null = null;
+let relatedProducts: Product[] = [];
+
+try {
+  const response = await productService.getProductById(productId!);
+  if (response.success && response.data) {
+    product = response.data;
+    
+    // Fetch related products from the same category
+    if (product.category_id) {
+      try {
+        const relatedResponse = await productService.getProductsByCategory(product.category_id);
+        if (relatedResponse.success && relatedResponse.data) {
+          // Filter out current product and limit to 4 related items
+          relatedProducts = relatedResponse.data
+            .filter((p: Product) => p.id !== product!.id && p.status === 'published')
+            .slice(0, 4);
+        }
+      } catch (error) {
+        console.error('Error fetching related products:', error);
+      }
     }
-  } catch (error) {
-    console.error('Error fetching products for static paths:', error);
   }
-  return [];
+} catch (error) {
+  console.error('Error fetching product:', error);
 }
 
-const { product } = Astro.props;
-const UPLOADS_URL = import.meta.env.PUBLIC_UPLOADS_URL || 'http://localhost:5000/uploads';
+if (!product) {
+  return Astro.redirect('/404');
+}
+
 // Remove leading /uploads/ from image_path if present
 const imagePath = product?.image_path?.replace(/^\/uploads\//, '') || '';
 const imageUrl = imagePath ? `${UPLOADS_URL}/${imagePath}` : '/productimages/spirulinapowder.png';
-console.log('Rendering product page:', product?.id, 'Image URL:', imageUrl);
 ---
 
 <Layout>
@@ -44,10 +57,38 @@ console.log('Rendering product page:', product?.id, 'Image URL:', imageUrl);
         <div class="w-full bg-black/20 rounded-lg p-4 flex items-center justify-center">
           <img id="productImage" src={imageUrl} alt={product.name} class="w-full h-96 object-contain rounded-lg" />
         </div>
-        <div id="thumbnailRow" class="mt-4 flex gap-3 overflow-x-auto">
-          <!-- thumbnails -->
-          <img class="w-20 h-20 object-cover rounded border border-green-500/30 cursor-pointer" src={imageUrl} alt={product.name} onclick="document.getElementById('productImage').src=this.src" />
-        </div>
+        
+        <!-- Product Variants/Related Products as Thumbnails -->
+        {relatedProducts.length > 0 && (
+          <div class="mt-4">
+            <h4 class="text-sm text-gray-300 mb-2 font-semibold">Available Varieties:</h4>
+            <div id="thumbnailRow" class="flex gap-3 overflow-x-auto pb-2">
+              <!-- Current Product Thumbnail -->
+              <div class="shrink-0">
+                <div class="w-20 h-20 object-cover rounded border-2 border-yellow-400 cursor-pointer relative bg-gray-700/50 flex items-center justify-center overflow-hidden">
+                  <img src={imageUrl} alt={product.name} class="w-full h-full object-cover" />
+                  <div class="absolute inset-0 border-2 border-yellow-400 pointer-events-none"></div>
+                </div>
+                <p class="text-xs text-center mt-1 text-yellow-400 truncate w-20">Current</p>
+              </div>
+              
+              <!-- Related Product Thumbnails -->
+              {relatedProducts.map((relatedProduct) => {
+                const relatedImagePath = relatedProduct.image_path?.replace(/^\/uploads\//, '') || '';
+                const relatedImageUrl = relatedImagePath ? `${UPLOADS_URL}/${relatedImagePath}` : '/productimages/spirulinapowder.png';
+                
+                return (
+                  <a href={`/product/${relatedProduct.id}`} class="shrink-0 group">
+                    <div class="w-20 h-20 object-cover rounded border border-green-500/30 hover:border-green-400 cursor-pointer bg-gray-700/50 flex items-center justify-center overflow-hidden transition-all duration-200">
+                      <img src={relatedImageUrl} alt={relatedProduct.name} class="w-full h-full object-cover" />
+                    </div>
+                    <p class="text-xs text-center mt-1 text-gray-300 group-hover:text-green-400 truncate w-20" title={relatedProduct.name}>{relatedProduct.name.substring(0, 12)}</p>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       <!-- Right: Info -->
@@ -115,7 +156,7 @@ console.log('Rendering product page:', product?.id, 'Image URL:', imageUrl);
   <Cart />
 </Layout>
 
-<script define:vars={{ product, UPLOADS_URL: import.meta.env.PUBLIC_UPLOADS_URL || 'http://localhost:5000/uploads' }}>
+<script is:inline define:vars={{ productData: product, uploadsUrl: UPLOADS_URL }}>
   // Cart utility functions
   const CART_KEY = 'symbicroft_cart';
 
@@ -148,6 +189,9 @@ console.log('Rendering product page:', product?.id, 'Image URL:', imageUrl);
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    const product = productData;
+    const UPLOADS_URL = uploadsUrl;
+    
     // Remove leading /uploads/ from image_path if present
     const imagePath = product.image_path ? product.image_path.replace(/^\/uploads\//, '') : '';
     const imageUrl = imagePath ? `${UPLOADS_URL}/${imagePath}` : '/productimages/spirulinapowder.png';

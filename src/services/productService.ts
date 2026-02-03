@@ -102,4 +102,13 @@ export const productService = {
       data: response.product
     };
   },
+
+  async getProductsByCategory(categoryId: number): Promise<ProductsResponse> {
+    const response = await apiClient.get<any>(`/categories/${categoryId}/products`);
+    // Backend returns { products: [...] }
+    return {
+      success: true,
+      data: response.products || []
+    };
+  },
 };
