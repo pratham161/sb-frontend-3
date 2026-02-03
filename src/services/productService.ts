@@ -57,7 +57,7 @@ export const productService = {
     };
   },
 
-  async getProductById(id: number): Promise<ProductResponse> {
+  async getProductById(id: string): Promise<ProductResponse> {
     const response = await apiClient.get<any>(`/products/${id}`);
     // Backend returns { product: {...} }
     // Transform to expected format

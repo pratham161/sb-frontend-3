@@ -5,11 +5,13 @@ import Layout from '../../layouts/Layout.astro';
 import Cart from '../../components/Cart.astro';
 import { productService } from '../../services/productService';
 
+export const prerender = true;
+
 export async function getStaticPaths() {
   try {
     const response = await productService.getAllProducts();
-    if (response.success && response.data) {
-      console.log('Products loaded for static paths:', response.data.length);
+    if (response.success && response.data && Array.isArray(response.data)) {
+      console.log('Products loaded for static paths:');
       return response.data.map((product) => {
         console.log(`Product ${product.id}: ${product.name}, image: ${product.image_path}`);
         return {
